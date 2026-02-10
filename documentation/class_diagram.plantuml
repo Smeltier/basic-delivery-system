@@ -1,0 +1,74 @@
+@startuml class_diagram
+
+skinparam linetype ortho
+left to right direction
+skinparam classArrowColor black
+skinparam nodesep 80
+skinparam ranksep 80
+
+skinparam ClassDiagram {
+    ArrowThickness 1
+    ArrowColor black
+    HorizontalSpacing 60
+    VerticalSpacing 60
+    ArrowFontSize 11
+    ArrowFontColor black
+    ArrowFontStyle plain
+}
+
+class Order {
+    + Order(OrderId id, Client client)
+    + void addItem(Product product, int quantity)
+    + void pay()
+    + void cancel()
+    + Money total()
+    # void internalAddItem(OrderItem item)
+    # void changeState(OrderState newState)
+}
+
+class OrderId {
+    - value: UUID
+
+    + OrderId(value: UUID)
+    {static} + OrderId generate()
+}
+
+class OrderItem {
+    - int quantity
+
+    + OrderItem(Product product, int quantity, Money unitPrice)
+    + Money total()
+}
+
+interface OrderState {
+    + void addItem(OrderItem item)
+    + void confirm(Order order)
+    + void cancel(Order order)
+}
+
+class Money {
+}
+
+class ConfirmedState implements OrderState {
+}
+
+class CancelledState implements OrderState {
+}
+
+class PaidState implements OrderState {
+}
+
+class Product {
+}
+
+Order *--> "1 state" OrderState
+Order o--> "1..* items" OrderItem
+Order o--> "1 id" OrderId
+
+OrderItem o--> "1 product" Product
+OrderItem o--> "1 unitPrice" Money
+
+Product o--> "1 id" ProductId
+Product o--> "1 unitPrice" Money
+
+@enduml
