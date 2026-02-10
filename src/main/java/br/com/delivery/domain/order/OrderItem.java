@@ -1,4 +1,7 @@
-package domain.order;
+package br.com.delivery.domain.order;
+
+import br.com.delivery.domain.Product;
+import br.com.delivery.domain.shared.Money;
 
 public class OrderItem {
   private final int quantity;
@@ -23,4 +26,4 @@ public class OrderItem {
   public Money total() {
     return unitPrice.multiply(quantity);
   }
-} 
+}
