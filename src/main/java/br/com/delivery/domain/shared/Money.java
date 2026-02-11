@@ -34,8 +34,12 @@ public final class Money {
     return new Money(this.amount.multiply(BigDecimal.valueOf(value)), this.currency);
   }
 
-  public boolean isPositive(Money value) {
+  public boolean isPositive() {
     return amount.compareTo(BigDecimal.ZERO) > 0;
+  }
+
+  public boolean isZero() {
+    return amount.compareTo(BigDecimal.ZERO) == 0;
   }
 
   private void ensureSameCurrency(Money value) {
