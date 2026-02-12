@@ -8,8 +8,8 @@ public final class Money {
   private final Currency currency;
 
   private Money(BigDecimal amount, Currency currency) {
-    this.amount = amount;
-    this.currency = currency;
+    this.amount = Objects.requireNonNull(amount);
+    this.currency = Objects.requireNonNull(currency);
   }
 
   public static Money of(BigDecimal amount, Currency currency) {
@@ -36,6 +36,10 @@ public final class Money {
 
   public boolean isPositive() {
     return amount.compareTo(BigDecimal.ZERO) > 0;
+  }
+
+  public boolean isNegative() {
+    return amount.compareTo(BigDecimal.ZERO) < 0;
   }
 
   public boolean isZero() {
