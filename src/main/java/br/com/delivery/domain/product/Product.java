@@ -11,6 +11,9 @@ public class Product {
   private boolean active;
 
   public Product(ProductId id, String name, Money price) {
+    if (name.isBlank()) {
+      throw new IllegalArgumentException("Nome inválido.");
+    }
     this.id = Objects.requireNonNull(id);
     this.name = Objects.requireNonNull(name);
     this.price = Objects.requireNonNull(price);
@@ -28,7 +31,18 @@ public class Product {
     if (newPrice == null || newPrice.isNegative()) {
       throw new IllegalArgumentException("Novo preço inválido.");
     }
+    if (!this.active) {
+      throw new IllegalArgumentException("Produto inativo.");
+    }
     this.price = newPrice;
+  }
+
+  public void deactivate() {
+    this.active = false;
+  }
+
+  public void activate() {
+    this.active = true;
   }
 
   public ProductId getId() {
@@ -37,5 +51,12 @@ public class Product {
 
   public String getName() {
     return name;
+  }
+
+  public void setName(String newName) {
+    if (newName.isBlank()) {
+      throw new IllegalArgumentException("Nome inválido.");
+    }
+    this.name = Objects.requireNonNull(newName);
   }
 }
