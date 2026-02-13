@@ -1,6 +1,5 @@
 package br.com.delivery.domain.order;
 
-import br.com.delivery.domain.product.Product;
 import br.com.delivery.domain.product.ProductId;
 import br.com.delivery.domain.shared.Money;
 
