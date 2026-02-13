@@ -3,7 +3,7 @@ package br.com.delivery.domain.order;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import br.com.delivery.domain.client.Client;
+import br.com.delivery.domain.client.ClientId;
 import br.com.delivery.domain.product.ProductId;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Currency;
@@ -11,15 +11,15 @@ import br.com.delivery.domain.payment.PaymentId;
 
 public class Order {
   private final OrderId id;
-  private final Client client;
+  private final ClientId clientId;
   private final Currency currency;
   private final ArrayList<OrderItem> items;
   private final ArrayList<PaymentId> payments;
   private OrderState state;
 
-  public Order(OrderId id, Client client, Currency currency) {
+  public Order(OrderId id, ClientId clientId, Currency currency) {
     this.id = Objects.requireNonNull(id);
-    this.client = Objects.requireNonNull(client);
+    this.clientId = Objects.requireNonNull(clientId);
     this.currency = Objects.requireNonNull(currency);
 
     this.state = new CreatedState();
@@ -56,8 +56,8 @@ public class Order {
     return id;
   }
 
-  public Client getClient() {
-    return client;
+  public ClientId getClientId() {
+    return clientId;
   }
 
   protected void internalAddItem(OrderItem item) {
