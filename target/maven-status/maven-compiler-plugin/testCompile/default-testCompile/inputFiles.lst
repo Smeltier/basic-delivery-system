@@ -1,5 +1,7 @@
 /Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/client/ClientIdTest.java
 /Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/client/ClientTest.java
+/Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/payment/PaymentIdTest.java
+/Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/payment/PaymentTest.java
 /Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/product/ProductIdTest.java
 /Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/product/ProductTest.java
 /Users/smeltier/Documents/computer-engineering/codes/basic-delivery/src/test/java/br/com/delivery/domain/shared/EmailTest.java
