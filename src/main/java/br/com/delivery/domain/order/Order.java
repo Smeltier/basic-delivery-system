@@ -1,51 +1,74 @@
 package br.com.delivery.domain.order;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import br.com.delivery.domain.client.ClientId;
-import br.com.delivery.domain.product.ProductId;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.payment.PaymentId;
+import br.com.delivery.domain.product.ProductId;
 
 public class Order {
   private final OrderId id;
   private final ClientId clientId;
   private final Currency currency;
-  private final ArrayList<OrderItem> items;
-  private final ArrayList<PaymentId> payments;
-  private OrderState state;
+  private final List<OrderItem> items;
+  private final List<PaymentId> payments;
+  private OrderStatus status;
 
-  public Order(OrderId id, ClientId clientId, Currency currency) {
+  private Order(OrderId id, ClientId clientId, Currency currency) {
     this.id = Objects.requireNonNull(id);
     this.clientId = Objects.requireNonNull(clientId);
     this.currency = Objects.requireNonNull(currency);
 
-    this.state = new CreatedState();
     this.items = new ArrayList<>();
     this.payments = new ArrayList<>();
+    this.status = OrderStatus.CREATED;
+  }
+
+  public static Order create(ClientId clientId, Currency currency) {
+    return new Order(OrderId.generate(), clientId, currency);
   }
 
   public void addItem(ProductId productId, String productName, Money unitPrice, int quantity) {
+    if (status != OrderStatus.CREATED) {
+      throw new IllegalStateException("Não pode adicionar itens no estado " + status);
+    }
+
     OrderItem item = new OrderItem(productId, productName, unitPrice, quantity);
-    state.addItem(this, item);
+    items.add(item);
   }
 
-  public void addPayment(PaymentId paymentId) {
+  public void registerPayment(PaymentId paymentId) {
+    Objects.requireNonNull(paymentId);
     payments.add(paymentId);
   }
 
-  public void pay() {
-    state.pay(this);
+  public void markAsPaid() {
+    if (status != OrderStatus.CREATED) {
+      throw new IllegalStateException("O pedido não pode ser pago no estado " + status);
+    }
+    status = OrderStatus.PAID;
+  }
+
+  public void confirm() {
+    if (status != OrderStatus.PAID) {
+      throw new IllegalStateException("Apenas pedidos pagos podem ser confirmados.");
+    }
+    status = OrderStatus.CONFIRMED;
   }
 
   public void cancel() {
-    state.cancel(this);
+    if (status == OrderStatus.CONFIRMED) {
+      throw new IllegalStateException("Pedidos confirmados não podem ser cancelados.");
+    }
+    status = OrderStatus.CANCELLED;
   }
 
   public Money total() {
-    Money total = Money.zero(this.currency);
+    Money total = Money.zero(currency);
     for (OrderItem item : this.items) {
       total = total.add(item.total());
     }
@@ -60,11 +83,15 @@ public class Order {
     return clientId;
   }
 
-  protected void internalAddItem(OrderItem item) {
-    items.add(item);
+  public OrderStatus getStatus() {
+    return status;
   }
 
-  protected void changeState(OrderState newState) {
-    this.state = newState;
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public List<PaymentId> getPayments() {
+    return payments;
   }
 }
