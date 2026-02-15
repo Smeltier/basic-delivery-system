@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import br.com.delivery.domain.exception.InvalidOrderOperationException;
 import br.com.delivery.domain.client.ClientId;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Currency;
@@ -34,7 +35,7 @@ public class Order {
 
   public void addItem(ProductId productId, String productName, Money unitPrice, int quantity) {
     if (status != OrderStatus.CREATED) {
-      throw new IllegalStateException("Não pode adicionar itens no estado " + status);
+      throw new InvalidOrderOperationException("Não pode adicionar itens no estado " + status);
     }
 
     OrderItem item = new OrderItem(productId, productName, unitPrice, quantity);
@@ -48,21 +49,21 @@ public class Order {
 
   public void markAsPaid() {
     if (status != OrderStatus.CREATED) {
-      throw new IllegalStateException("O pedido não pode ser pago no estado " + status);
+      throw new InvalidOrderOperationException("O pedido não pode ser pago no estado " + status);
     }
     status = OrderStatus.PAID;
   }
 
   public void confirm() {
     if (status != OrderStatus.PAID) {
-      throw new IllegalStateException("Apenas pedidos pagos podem ser confirmados.");
+      throw new InvalidOrderOperationException("Apenas pedidos pagos podem ser confirmados.");
     }
     status = OrderStatus.CONFIRMED;
   }
 
   public void cancel() {
     if (status == OrderStatus.CONFIRMED) {
-      throw new IllegalStateException("Pedidos confirmados não podem ser cancelados.");
+      throw new InvalidOrderOperationException("Pedidos confirmados não podem ser cancelados.");
     }
     status = OrderStatus.CANCELLED;
   }
