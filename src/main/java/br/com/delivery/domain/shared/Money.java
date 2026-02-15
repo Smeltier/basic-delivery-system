@@ -3,13 +3,13 @@ package br.com.delivery.domain.shared;
 import java.util.Objects;
 import java.math.BigDecimal;
 
-public final class Money {
-  private final BigDecimal amount;
-  private final Currency currency;
+import br.com.delivery.domain.exception.InvalidMoneyOperationException;
+import br.com.delivery.domain.exception.CurrencyMismatchException;
 
-  public Money(BigDecimal amount, Currency currency) {
-    this.amount = Objects.requireNonNull(amount);
-    this.currency = Objects.requireNonNull(currency);
+public record Money(BigDecimal amount, Currency currency) {
+  public Money {
+    amount = Objects.requireNonNull(amount);
+    currency = Objects.requireNonNull(currency);
   }
 
   public static Money zero(Currency currency) {
@@ -23,7 +23,7 @@ public final class Money {
 
   public Money multiply(int value) {
     if (value < 0) {
-      throw new IllegalArgumentException("O valor não pode ser zero.");
+      throw new InvalidMoneyOperationException("O valor não pode ser zero.");
     }
     return new Money(this.amount.multiply(BigDecimal.valueOf(value)), this.currency);
   }
@@ -42,29 +42,7 @@ public final class Money {
 
   private void ensureSameCurrency(Money value) {
     if (!this.currency.equals(value.currency)) {
-      throw new IllegalArgumentException("Operações não podem ser feitas entre moedas diferentes.");
+      throw new CurrencyMismatchException("Operações não podem ser feitas entre moedas diferentes.");
     }
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof Money)) {
-      return false;
-    }
-    Money money = (Money) obj;
-    return this.amount.equals(money.amount) && this.currency == money.currency;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(amount, currency);
-  }
-
-  @Override
-  public String toString() {
-    return this.currency + " " + this.amount;
   }
 }
