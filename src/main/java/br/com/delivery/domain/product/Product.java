@@ -32,7 +32,7 @@ public class Product {
       throw new IllegalArgumentException("Novo preço inválido.");
     }
     if (!this.active) {
-      throw new IllegalArgumentException("Produto inativo.");
+      throw new IllegalStateException("Produto inativo.");
     }
     this.price = newPrice;
   }
@@ -43,6 +43,10 @@ public class Product {
 
   public void activate() {
     this.active = true;
+  }
+
+  public boolean isActive() {
+    return this.active;
   }
 
   public ProductId getId() {
