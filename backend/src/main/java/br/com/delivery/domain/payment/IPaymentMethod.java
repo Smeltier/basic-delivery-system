@@ -1,5 +1,5 @@
 package br.com.delivery.domain.payment;
 
-public interface PaymentMethod {
+public interface IPaymentMethod {
   PaymentProcessingResult process(Payment payment);
 }
