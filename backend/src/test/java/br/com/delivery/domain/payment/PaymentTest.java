@@ -11,7 +11,8 @@ import br.com.delivery.domain.shared.Money;
 public class PaymentTest {
   private final Money amount = new Money(BigDecimal.TEN, Currency.BRL);
   private final FakeApprovedPaymentMethod fakeApprovedMethod = new FakeApprovedPaymentMethod();
-  private final FakeRejectedPaymentMethod fakeRejectedMethod = new FakeRejectedPaymentMethod();
+  // private final FakeRejectedPaymentMethod fakeRejectedMethod = new
+  // FakeRejectedPaymentMethod();
 
   @Test
   void shouldCreateWithPendingStatus() {
