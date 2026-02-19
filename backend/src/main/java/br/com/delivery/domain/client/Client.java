@@ -1,7 +1,9 @@
 package br.com.delivery.domain.client;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import br.com.delivery.domain.shared.Cpf;
 import br.com.delivery.domain.shared.Email;
 import br.com.delivery.domain.exception.InactiveClientException;
 import br.com.delivery.domain.exception.InvalidClientOperationException;
@@ -9,6 +11,7 @@ import br.com.delivery.domain.exception.InvalidClientOperationException;
 public class Client {
   private final ClientId id;
   private Email email;
+  private Cpf cpf;
   private String name;
   private boolean active;
 
@@ -47,9 +50,17 @@ public class Client {
     return email;
   }
 
+  public Optional<Cpf> getCpf() {
+    return Optional.ofNullable(this.cpf);
+  }
+
   public void setEmail(Email newEmail) {
     ensureClientIsActive();
     email = Objects.requireNonNull(newEmail);
+  }
+
+  public void setCpf(Cpf newCpf) {
+    this.cpf = Objects.requireNonNull(newCpf);
   }
 
   public void setName(String newName) {
