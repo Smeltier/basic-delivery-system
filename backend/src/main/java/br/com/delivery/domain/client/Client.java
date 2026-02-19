@@ -48,19 +48,21 @@ public class Client {
   }
 
   public void setEmail(Email newEmail) {
-    if (!this.active) {
-      throw new InactiveClientException("Cliente inativo.");
-    }
+    ensureClientIsActive();
     email = Objects.requireNonNull(newEmail);
   }
 
   public void setName(String newName) {
-    if (!this.active) {
-      throw new InactiveClientException("Cliente inativo.");
-    }
     if (newName == null || newName.isBlank()) {
       throw new InvalidClientOperationException("Nome inválido");
     }
+    ensureClientIsActive();
     this.name = newName;
+  }
+
+  private void ensureClientIsActive() {
+    if (!this.active) {
+      throw new InactiveClientException("Cliente inativo.");
+    }
   }
 }
