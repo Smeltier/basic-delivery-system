@@ -41,7 +41,7 @@ public final class Payment {
 
   public void cancel() {
     if (status != PaymentStatus.PENDING) {
-      throw new InvalidPaymentOperationException("Só pagamentos pendentes podem ser processados.");
+      throw new InvalidPaymentOperationException("Só pagamentos pendentes podem ser cancelados.");
     }
     changeStatus(PaymentStatus.CANCELLED);
   }
