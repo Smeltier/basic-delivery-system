@@ -8,21 +8,21 @@ import br.com.delivery.domain.shared.Email;
 import br.com.delivery.domain.exception.InactiveClientException;
 import br.com.delivery.domain.exception.InvalidClientOperationException;
 
-public class Client {
+public final class Client {
   private final ClientId id;
   private Email email;
   private Cpf cpf;
   private String name;
   private boolean active;
 
-  private Client(ClientId id, String name, Email email) {
+  private Client(final ClientId id, final String name, final Email email) {
     this.id = Objects.requireNonNull(id);
     this.active = true;
     setEmail(email);
     setName(name);
   }
 
-  public static Client create(String name, Email email) {
+  public static Client create(final String name, final Email email) {
     return new Client(ClientId.generate(), name, email);
   }
 
@@ -54,21 +54,39 @@ public class Client {
     return Optional.ofNullable(this.cpf);
   }
 
-  public void setEmail(Email newEmail) {
+  public void setEmail(final Email newEmail) {
     ensureClientIsActive();
     email = Objects.requireNonNull(newEmail);
   }
 
-  public void setCpf(Cpf newCpf) {
+  public void setCpf(final Cpf newCpf) {
+    ensureClientIsActive();
     this.cpf = Objects.requireNonNull(newCpf);
   }
 
-  public void setName(String newName) {
+  public void setName(final String newName) {
     if (newName == null || newName.isBlank()) {
       throw new InvalidClientOperationException("Nome inválido");
     }
     ensureClientIsActive();
     this.name = newName;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Client)) {
+      return false;
+    }
+    Client client = (Client) o;
+    return this.id.equals(client.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 
   private void ensureClientIsActive() {
