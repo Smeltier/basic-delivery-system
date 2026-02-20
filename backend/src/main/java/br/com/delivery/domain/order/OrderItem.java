@@ -1,5 +1,7 @@
 package br.com.delivery.domain.order;
 
+import java.util.Objects;
+
 import br.com.delivery.domain.product.ProductId;
 import br.com.delivery.domain.shared.Money;
 
@@ -10,22 +12,16 @@ public class OrderItem {
   private final int quantity;
 
   public OrderItem(ProductId productId, String productName, Money unitPrice, int quantity) {
-    if (productId == null) {
-      throw new IllegalArgumentException("ID do produto não pode ser nulo.");
-    }
-    if (productName == null || productName.isBlank()) {
+    if (productName.isBlank()) {
       throw new IllegalArgumentException("Nome do produto inválido");
-    }
-    if (unitPrice == null) {
-      throw new IllegalArgumentException("Preço unitário não poder ser nulo.");
     }
     if (quantity <= 0) {
       throw new IllegalArgumentException("Quantidade inválida.");
     }
-    this.productId = productId;
-    this.productName = productName;
+    this.productId = Objects.requireNonNull(productId);
+    this.productName = Objects.requireNonNull(productName);
+    this.unitPrice = Objects.requireNonNull(unitPrice);
     this.quantity = quantity;
-    this.unitPrice = unitPrice;
   }
 
   public Money total() {
