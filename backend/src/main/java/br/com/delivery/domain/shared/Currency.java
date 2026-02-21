@@ -1,5 +1,7 @@
 package br.com.delivery.domain.shared;
 
 public enum Currency {
-  BRL, CAD
+  BRL,
+  CAD,
+  USD,
 }
