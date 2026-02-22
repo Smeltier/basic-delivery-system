@@ -3,6 +3,7 @@ package br.com.delivery.domain.client;
 import java.util.Objects;
 import java.util.Optional;
 
+import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Cpf;
 import br.com.delivery.domain.shared.Email;
 import br.com.delivery.domain.exception.InactiveClientException;
@@ -10,20 +11,28 @@ import br.com.delivery.domain.exception.InvalidClientOperationException;
 
 public final class Client {
   private final ClientId id;
+  private Address address;
+  private boolean active;
+  private String name;
   private Email email;
   private Cpf cpf;
-  private String name;
-  private boolean active;
 
   private Client(final ClientId id, final String name, final Email email) {
     this.id = Objects.requireNonNull(id);
-    this.active = true;
+    activate();
     setEmail(email);
     setName(name);
   }
 
   public static Client create(final String name, final Email email) {
     return new Client(ClientId.generate(), name, email);
+  }
+
+  public static Client restore(ClientId id, String name, Email email, Cpf cpf, Address address) {
+    Client client = new Client(id, name, email);
+    client.setCpf(cpf);
+    client.updateAddress(address);
+    return client;
   }
 
   public boolean isActive() {
@@ -38,6 +47,10 @@ public final class Client {
     this.active = true;
   }
 
+  public void updateAddress(Address newAddress) {
+    this.address = Objects.requireNonNull(newAddress);
+  }
+
   public String getName() {
     return name;
   }
@@ -48,6 +61,10 @@ public final class Client {
 
   public Email getEmail() {
     return email;
+  }
+
+  public Address getAddress() {
+    return address;
   }
 
   public Optional<Cpf> getCpf() {
