@@ -11,7 +11,7 @@ import br.com.delivery.domain.product.Product;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Money;
 
-// TODO: add owner's refference.
+// TODO: add owner refference.
 
 public final class Restaurant {
   private final RestaurantId id;
