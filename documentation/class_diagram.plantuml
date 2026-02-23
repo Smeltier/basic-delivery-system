@@ -16,59 +16,205 @@ skinparam ClassDiagram {
     ArrowFontStyle plain
 }
 
-class Order {
-    + Order(OrderId id, Client client)
-    + void addItem(Product product, int quantity)
-    + void pay()
-    + void cancel()
-    + Money total()
-    # void internalAddItem(OrderItem item)
-    # void changeState(OrderState newState)
+namespace Domain {
+    class Order {
+        - LocalDateTime paidAt
+        - LocalDateTime createdAt
+        - LocalDateTime confirmedAt
+        - LocalDateTime cancelledAt
+        - LocalDateTime deliveredAt
+
+        - Order(OrderId id, ClientId clientId, Currency currency, LocalDateTime createdAt)
+        + {static} Order create(ClientId clientId, Currency currency)
+        + {static} Order restore(OrderId id, ClientId clientId, Currency currency LocalDateTime createdAt, OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address, Money deliveryFee, LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt, LocalDateTime deliveredAt)
+        + void addItem(ProductId productId, String productName, Money unitPrice, int quantity)
+        + void removeItem(ProductId productId)
+        + void changeDeliveryAddress(Address newAddress, Money newFee)
+        + void registerPayment(PaymentId paymentId)
+        + Money total()
+        + void markAsPaid()
+        + void markAsDelivered()
+        + void confirm()
+        + void cancel()
+        + OrderId getId()
+        + ClientId getClientId()
+        + OrderStatus getStatus()
+        + Currency getCurrency()
+        + Money getDeliveryFee()
+        + Address getDeliveryAddress()
+        + List<PaymentId> getPayments()
+        + List<OrderItem> getItems()
+    }
+
+    class OrderId <<Value Object>> {
+        - UUID value
+
+        + OrderId(UUID value)
+        + {static} OrderId generate()
+        + UUID getValue()
+    }
+
+    class OrderItem <<Immutable>> {
+        - ProductId productId
+        - String productName
+        - Money unitPrice
+        - int quantity
+
+        + OrderItem(ProductId productId, String productName, Money unitPrice, int quantity)
+        + Money total()
+        + ProductId getProductId()
+        + String getProductName()
+        + Money getUnitPrice()
+        + int getQuantity()
+    }
+
+    enum OrderStatus {
+        CREATED,
+        PAID,
+        CONFIRMED,
+        DELIVERED,
+        CANCELLED
+    }
+
+    exception InvalidOrderOperationException {
+    }
+
+    class Address <<Immutable>> {
+        - String street
+        - String number
+        - String complement
+        - String city
+        - String country
+        - ZipCode zipCode
+
+        + Address(String street, String number, String complement, String city, String country, ZipCode zipCode)
+        + String getStreet()
+        + String getNumber()
+        + String getComplement()
+        + String getCity()
+        + String getCountry()
+        + ZipCode getZipCode()
+    }
+
+    class Cpf <<Immutable>> {
+        - {static} Pattern CPF_PATTERN
+        - String value
+
+        + Cpf(String value)
+        - boolean isSequence(String cpf)
+        - boolean isValidCpf(String cpf)
+        - int calculateDigit(String str, int weight)
+    }
+
+    enum Currency {
+        BRL,
+        CAD,
+        USD
+    }
+
+    exception CurrencyMismatchException {
+    }
+
+    class Email <<Immutable>> {
+        - {static} Pattern EMAIL_PATTERN
+        - String value
+
+        + Email(String value)
+        + String getValue()
+    }
+
+    class Money <<Immutable>> {
+        - BigDecimal amount
+        - Currency currency
+
+        - Money(BigDecimal amount, Currency currency)
+        + {static} Money of(double amount, Currency currency)
+        + {static} Money of(BigDecimal amount, Currency currency)
+        + {static} Money zero(Currency currency)
+        + Money add(Money value)
+        + Money subtract(Money value)
+        + Money multiply(int factor)
+        + boolean isPositive()
+        + boolean isZero()
+        - void ensureSameCurrency(Money value)
+    }
+
+    class ZipCode <<Immutable>> {
+        - {static} Pattern ZIP_PATTERN
+        - String value
+
+        + ZipCode(String value)
+        + String getValue()
+        + String toString()
+        - String normalize(String value)
+    }
+
+    class Client {
+    }
+
+    class ClientId <<Immutable>> {
+    }
+
+    interface IPaymentMethod {
+        + PaymentProcessingResult process(Payment payment)
+    }
+
+    class Payment {
+        - Payment(PaymentId id, OrderId orderId, IPaymentMethod paymentMethod, Money amount)
+        + {static} Payment create(OrderId orderId, IPaymentMethod paymentMethod, Money amount)
+        + void process()
+        + void cancel()
+        + void refund()
+        + boolean isApproved()
+        + PaymentId getId()
+        + OrderId getOrderId()
+        + Money getAmount()
+        + PaymentStatus getStatus()
+        - changeStatus(PaymentStatus newStatus)
+    }
+
+    class PaymentId <<Immutable>> {
+        - UUID value
+
+        + PaymentId(UUID value)
+        + {static} PaymentId generate()
+        + UUID getValue()
+    }
+
+    enum PaymentProcessingResult {
+        APPROVED,
+        REJECTED,
+        PENDING
+    }
+
+    enum PaymentStatus {
+        PENDING,
+        APPROVED,
+        DECLINED,
+        CANCELLED,
+        REFUNDED
+    }
 }
 
-class OrderId {
-    - value: UUID
+Order *--> "1 id" OrderId
+Order *--> "1 status" OrderStatus
+Order *--> "0..* items" OrderItem
+Order *--> "0..* payments" PaymentId 
+Order o--> "1 deliveryAddress" Address
+Order o--> "1 deliveryFee" Money
+Order o--> "1 clientId" ClientId
+Order o--> "1 currency" Currency
+Order ...> InvalidOrderOperationException: Throws
+Order ...> CurrencyMismatchException: Throws
 
-    + OrderId(value: UUID)
-    {static} + OrderId generate()
-}
+Payment *--> "1 id" PaymentId
+Payment o--> "1 paymentMethod" IPaymentMethod
+Payment o--> "1 amount" Money
+Payment o--> "1 orderId" OrderId
+Payment o--> "1 status" PaymentStatus
 
-class OrderItem {
-    - int quantity
+IPaymentMethod --> PaymentProcessingResult: Returns
 
-    + OrderItem(Product product, int quantity, Money unitPrice)
-    + Money total()
-}
-
-interface OrderState {
-    + void addItem(OrderItem item)
-    + void confirm(Order order)
-    + void cancel(Order order)
-}
-
-class Money {
-}
-
-class ConfirmedState implements OrderState {
-}
-
-class CancelledState implements OrderState {
-}
-
-class PaidState implements OrderState {
-}
-
-class Product {
-}
-
-Order *--> "1 state" OrderState
-Order o--> "1..* items" OrderItem
-Order o--> "1 id" OrderId
-
-OrderItem o--> "1 product" Product
-OrderItem o--> "1 unitPrice" Money
-
-Product o--> "1 id" ProductId
-Product o--> "1 unitPrice" Money
+Currency ...> CurrencyMismatchException: Throws
 
 @enduml
