@@ -8,6 +8,7 @@ import java.util.List;
 
 import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
 import br.com.delivery.domain.product.Product;
+import br.com.delivery.domain.product.ProductId;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Money;
 
@@ -41,6 +42,10 @@ public final class Restaurant {
   }
 
   public void addItem(String productName, Money unitPrice) {
+    if (status != RestaurantStatus.CLOSED) {
+      throw new InvalidRestaurantOperationException("Não pode adicionar itens com o restaurante ainda aberto.");
+    }
+
     if (productName == null) {
       throw new InvalidRestaurantOperationException("Nome do produto não deve ser nulo.");
     }
@@ -51,6 +56,14 @@ public final class Restaurant {
 
     Product product = Product.create(productName, unitPrice);
     this.menu.add(product);
+  }
+
+  public void removeItem(ProductId productId) {
+    if (status != RestaurantStatus.CLOSED) {
+      throw new InvalidRestaurantOperationException("Não pode remover itens com o restaurante ainda aberto.");
+    }
+
+    menu.removeIf(item -> item.getId().equals(productId));
   }
 
   public void openRestaurant(LocalTime now) {
