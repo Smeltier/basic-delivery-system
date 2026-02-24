@@ -3,14 +3,15 @@ package br.com.delivery.domain.restaurant;
 import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
+import br.com.delivery.domain.product.ProductId;
+import br.com.delivery.domain.product.Product;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.ZipCode;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RestaurantTest {
   private final LocalTime open = LocalTime.of(8, 0);
@@ -132,10 +133,6 @@ public class RestaurantTest {
   }
 
   @Test
-  void shouldThrowWhenRemoveANonexistentProduct() {
-  }
-
-  @Test
   void shouldBeEqualWhenSameId() {
     RestaurantId id = RestaurantId.generate();
     Restaurant r1 = Restaurant.restore(id, "restaurant1", hours, address);
@@ -177,5 +174,47 @@ public class RestaurantTest {
 
     assertThrows(NullPointerException.class,
         () -> restaurant.changeAddress(null));
+  }
+
+  @Test
+  void shouldRemoveItemSuccessfully() {
+    Restaurant restaurant = Restaurant.create("restaurant", hours, address);
+    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    Product product = restaurant.getMenu().get(0);
+
+    restaurant.removeItem(product.getId());
+
+    assertTrue(restaurant.getMenu().isEmpty());
+  }
+
+  @Test
+  void shouldThrowWhenRemoveItemWhileOpen() {
+    Restaurant restaurant = Restaurant.create("restaurant", hours, address);
+    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    Product product = restaurant.getMenu().get(0);
+    restaurant.openRestaurant(LocalTime.of(10, 0));
+
+    assertThrows(InvalidRestaurantOperationException.class,
+        () -> restaurant.removeItem(product.getId()));
+  }
+
+  @Test
+  void shouldNotThrowWhenRemoveNonexistentItem() {
+    Restaurant restaurant = Restaurant.create("restaurant", hours, address);
+    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    Product product = restaurant.getMenu().get(0);
+    restaurant.removeItem(product.getId());
+
+    assertDoesNotThrow(() -> restaurant.removeItem(product.getId()));
+  }
+
+  @Test
+  void shouldThrowWhenAddItemWhileOpen() {
+    Restaurant restaurant = Restaurant.create("restaurant", hours, address);
+    restaurant.addItem("product1", Money.of(5, Currency.BRL));
+    restaurant.openRestaurant(LocalTime.of(10, 5));
+
+    assertThrows(InvalidRestaurantOperationException.class,
+        () -> restaurant.addItem("product2", Money.of(10, Currency.BRL)));
   }
 }
