@@ -11,5 +11,3 @@ Sistema completo de gerenciamento de pedidos para delivery, desenvolvido como pr
 ---
 
 O projeto ainda está em andamento.
-
-<!-- bitehub -->
