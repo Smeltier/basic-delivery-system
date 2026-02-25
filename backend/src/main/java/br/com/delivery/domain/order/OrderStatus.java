@@ -1,7 +1,7 @@
 package br.com.delivery.domain.order;
 
 public enum OrderStatus {
-  CREATED,
+  DRAFT,
   PAID,
   CONFIRMED,
   DELIVERED,
