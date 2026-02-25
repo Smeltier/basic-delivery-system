@@ -9,29 +9,29 @@ import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.ZipCode;
-import br.com.delivery.domain.client.ClientId;
+import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.exception.CurrencyMismatchException;
-import br.com.delivery.domain.exception.InvalidOrderOperationException;
+import br.com.delivery.domain.exception.InvalidOrderException;
 import br.com.delivery.domain.payment.PaymentId;
-import br.com.delivery.domain.item.MenuItemCategory;
-import br.com.delivery.domain.item.MenuItemId;
+import br.com.delivery.domain.restaurant.MenuItemCategory;
+import br.com.delivery.domain.restaurant.MenuItemId;
 
 public class OrderTest {
   private final Address address = new Address("rua", "123", "casa", "cidade", "país", new ZipCode("36703-072"));
 
   @Test
   void shouldCreateOrderWithCorrectValue() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
-    assertEquals(clientId, order.getClientId());
+    assertEquals(clientId, order.getAccountId());
     assertEquals(brl, order.getCurrency());
   }
 
   @Test
   void shouldCreateWithCreatedStatus() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -40,7 +40,7 @@ public class OrderTest {
 
   @Test
   void paymentListShouldStartEmpty() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -50,7 +50,7 @@ public class OrderTest {
 
   @Test
   void orderItemListShouldStartEmpty() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -60,7 +60,7 @@ public class OrderTest {
 
   @Test
   void totalShouldBeZeroWhenCreated() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -69,7 +69,7 @@ public class OrderTest {
 
   @Test
   void shouldAddItemSuccessfuly() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -86,7 +86,7 @@ public class OrderTest {
 
   @Test
   void shouldRemoveItemSuccessfuly() {
-    ClientId clientId = ClientId.generate();
+    AccountId clientId = AccountId.generate();
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
@@ -103,7 +103,7 @@ public class OrderTest {
 
   @Test
   void shouldRegisterPayment() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
     PaymentId paymentId = PaymentId.generate();
 
     order.registerPayment(paymentId);
@@ -114,7 +114,7 @@ public class OrderTest {
 
   @Test
   void shouldTransitionThroughHappyPath() {
-    Order order = Order.create(ClientId.generate(), Currency.CAD);
+    Order order = Order.create(AccountId.generate(), Currency.CAD);
 
     Money price = Money.of(50.0, Currency.CAD);
     order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
@@ -131,63 +131,63 @@ public class OrderTest {
 
   @Test
   void shouldThrowWhenAddItemOutsideCreatedStatus() {
-    Order order = Order.create(ClientId.generate(), Currency.CAD);
+    Order order = Order.create(AccountId.generate(), Currency.CAD);
     order.cancel();
 
     Money price = Money.of(50.0, Currency.BRL);
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2));
   }
 
   @Test
   void shouldThrowWhenConfirmOutsidePaidStatus() {
-    Order order = Order.create(ClientId.generate(), Currency.CAD);
+    Order order = Order.create(AccountId.generate(), Currency.CAD);
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.confirm());
   }
 
   @Test
   void shouldThrowWhenPaidOutsideCreatedStatus() {
-    Order order = Order.create(ClientId.generate(), Currency.CAD);
+    Order order = Order.create(AccountId.generate(), Currency.CAD);
     order.cancel();
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 
   @Test
   void shouldThrowWhenChangeAddressOutsideCreatedStatus() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
     order.cancel();
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL)));
   }
 
   @Test
   void shouldThrowWhenMarkingAsPaidWithoutItems() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL));
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 
   @Test
   void shouldThrowWhenMarkingAsPaidWithoutAddress() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
 
     Money price = Money.of(50.0, Currency.BRL);
     order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 
   @Test
   void shouldNotAllowExternalModificationOfItemsList() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
     List<OrderItem> items = order.getItems();
 
     Money price = Money.of(50.0, Currency.BRL);
@@ -198,7 +198,7 @@ public class OrderTest {
 
   @Test
   void shouldAllowCancelWhenStatusIsPaid() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
 
     Money price = Money.of(50.0, Currency.BRL);
     order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
@@ -212,7 +212,7 @@ public class OrderTest {
 
   @Test
   void shouldThrowWhenAddingItemWithDifferentCurrency() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
     Money usdPrice = Money.of(10.0, Currency.USD);
 
     assertThrows(CurrencyMismatchException.class,
@@ -221,7 +221,7 @@ public class OrderTest {
 
   @Test
   void shouldThrowWhenAddingDeliveryFeeWithDifferentCurrency() {
-    Order order = Order.create(ClientId.generate(), Currency.BRL);
+    Order order = Order.create(AccountId.generate(), Currency.BRL);
 
     assertThrows(CurrencyMismatchException.class,
         () -> order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.USD)));

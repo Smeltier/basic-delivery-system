@@ -3,7 +3,7 @@ package br.com.delivery.domain.shared;
 import java.util.Objects;
 import java.math.BigDecimal;
 
-import br.com.delivery.domain.exception.InvalidMoneyOperationException;
+import br.com.delivery.domain.exception.InvalidMoneyException;
 import br.com.delivery.domain.exception.CurrencyMismatchException;
 import br.com.delivery.domain.exception.InsufficientFundsException;
 
@@ -12,7 +12,7 @@ public record Money(BigDecimal amount, Currency currency) {
     Objects.requireNonNull(amount);
     Objects.requireNonNull(currency);
     if (amount.compareTo(BigDecimal.ZERO) < 0) {
-      throw new InvalidMoneyOperationException("A quantidade não pode ser negativa.");
+      throw new InvalidMoneyException("A quantidade não pode ser negativa.");
     }
   }
 
@@ -43,7 +43,7 @@ public record Money(BigDecimal amount, Currency currency) {
 
   public Money multiply(int factor) {
     if (factor < 0) {
-      throw new InvalidMoneyOperationException("O fator não pode ser negativo.");
+      throw new InvalidMoneyException("O fator não pode ser negativo.");
     }
     return new Money(this.amount.multiply(BigDecimal.valueOf(factor)), this.currency);
   }

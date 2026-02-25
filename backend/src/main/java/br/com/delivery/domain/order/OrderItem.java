@@ -2,11 +2,11 @@ package br.com.delivery.domain.order;
 
 import java.util.Objects;
 
-import br.com.delivery.domain.item.MenuItemCategory;
-import br.com.delivery.domain.item.MenuItemId;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.exception.InvalidOrderItemException;
 import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
+import br.com.delivery.domain.restaurant.MenuItemCategory;
+import br.com.delivery.domain.restaurant.MenuItemId;
 
 public class OrderItem {
   private final MenuItemId menuItemId;

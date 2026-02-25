@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import br.com.delivery.domain.exception.InvalidOrderItemException;
 import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
-import br.com.delivery.domain.item.MenuItemCategory;
-import br.com.delivery.domain.item.MenuItemId;
+import br.com.delivery.domain.restaurant.MenuItemCategory;
+import br.com.delivery.domain.restaurant.MenuItemId;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
 

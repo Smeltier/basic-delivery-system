@@ -3,64 +3,34 @@ package br.com.delivery.domain.client;
 import java.util.Objects;
 import java.util.Optional;
 
+import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Cpf;
-import br.com.delivery.domain.shared.Email;
-import br.com.delivery.domain.exception.InactiveClientException;
-import br.com.delivery.domain.exception.InvalidClientOperationException;
 
 public final class Client {
-  private final ClientId id;
+  private final AccountId id;
   private Address address;
-  private boolean active;
-  private String name;
-  private Email email;
   private Cpf cpf;
 
-  private Client(final ClientId id, final String name, final Email email) {
+  private Client(AccountId id) {
     this.id = Objects.requireNonNull(id);
-    activate();
-    setEmail(email);
-    setName(name);
   }
 
-  public static Client create(final String name, final Email email) {
-    return new Client(ClientId.generate(), name, email);
+  public static Client create(AccountId id) {
+    return new Client(id);
   }
 
-  public static Client restore(ClientId id, String name, Email email, Cpf cpf, Address address) {
-    Client client = new Client(id, name, email);
-    client.setCpf(cpf);
-    client.updateAddress(address);
+  public static Client restore(AccountId id) {
+    Client client = new Client(id);
     return client;
-  }
-
-  public boolean isActive() {
-    return this.active;
-  }
-
-  public void deactivate() {
-    this.active = false;
-  }
-
-  public void activate() {
-    this.active = true;
   }
 
   public void updateAddress(Address newAddress) {
     this.address = Objects.requireNonNull(newAddress);
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public ClientId getId() {
+  public AccountId getId() {
     return id;
-  }
-
-  public Email getEmail() {
-    return email;
   }
 
   public Address getAddress() {
@@ -71,22 +41,8 @@ public final class Client {
     return Optional.ofNullable(this.cpf);
   }
 
-  public void setEmail(final Email newEmail) {
-    ensureClientIsActive();
-    email = Objects.requireNonNull(newEmail);
-  }
-
   public void setCpf(final Cpf newCpf) {
-    ensureClientIsActive();
     this.cpf = Objects.requireNonNull(newCpf);
-  }
-
-  public void setName(final String newName) {
-    if (newName == null || newName.isBlank()) {
-      throw new InvalidClientOperationException("Nome inválido");
-    }
-    ensureClientIsActive();
-    this.name = newName;
   }
 
   @Override
@@ -104,11 +60,5 @@ public final class Client {
   @Override
   public int hashCode() {
     return Objects.hash(id);
-  }
-
-  private void ensureClientIsActive() {
-    if (!this.active) {
-      throw new InactiveClientException("Cliente inativo.");
-    }
   }
 }

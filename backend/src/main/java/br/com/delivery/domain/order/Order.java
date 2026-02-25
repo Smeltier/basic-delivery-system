@@ -8,33 +8,33 @@ import java.util.Optional;
 import java.util.Collections;
 
 import br.com.delivery.domain.exception.CurrencyMismatchException;
-import br.com.delivery.domain.exception.InvalidOrderOperationException;
-import br.com.delivery.domain.client.ClientId;
+import br.com.delivery.domain.exception.InvalidOrderException;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.payment.PaymentId;
-import br.com.delivery.domain.item.MenuItemCategory;
-import br.com.delivery.domain.item.MenuItemId;
+import br.com.delivery.domain.restaurant.MenuItemCategory;
+import br.com.delivery.domain.restaurant.MenuItemId;
+import br.com.delivery.domain.account.AccountId;
 
 public class Order {
   private final OrderId id;
-  private final ClientId clientId;
+  private final AccountId accountId;
   private final Currency currency;
   private final List<OrderItem> items;
   private final LocalDateTime createdAt;
   private final List<PaymentId> payments;
-  private OrderStatus status;
-  private Address deliveryAddress;
-  private Money deliveryFee;
-  private LocalDateTime paidAt;
   private LocalDateTime confirmedAt;
   private LocalDateTime cancelledAt;
   private LocalDateTime deliveredAt;
+  private LocalDateTime paidAt;
+  private Address deliveryAddress;
+  private Money deliveryFee;
+  private OrderStatus status;
 
-  private Order(OrderId id, ClientId clientId, Currency currency, LocalDateTime createdAt) {
+  private Order(OrderId id, AccountId accountId, Currency currency, LocalDateTime createdAt) {
     this.id = Objects.requireNonNull(id);
-    this.clientId = Objects.requireNonNull(clientId);
+    this.accountId = Objects.requireNonNull(accountId);
     this.currency = Objects.requireNonNull(currency);
     this.createdAt = Objects.requireNonNull(createdAt);
     this.items = new ArrayList<>();
@@ -43,14 +43,14 @@ public class Order {
     this.deliveryFee = Money.zero(currency);
   }
 
-  public static Order create(ClientId clientId, Currency currency) {
-    return new Order(OrderId.generate(), clientId, currency, LocalDateTime.now());
+  public static Order create(AccountId accountId, Currency currency) {
+    return new Order(OrderId.generate(), accountId, currency, LocalDateTime.now());
   }
 
-  public static Order restore(OrderId id, ClientId clientId, Currency currency, LocalDateTime createdAt,
+  public static Order restore(OrderId id, AccountId accountId, Currency currency, LocalDateTime createdAt,
       OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address, Money deliveryFee,
       LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt, LocalDateTime deliveredAt) {
-    Order order = new Order(id, clientId, currency, createdAt);
+    Order order = new Order(id, accountId, currency, createdAt);
     order.status = status;
     order.items.addAll(items);
     order.payments.addAll(payments);
@@ -67,7 +67,7 @@ public class Order {
       Money unitPrice, int quantity) {
 
     if (status != OrderStatus.CREATED) {
-      throw new InvalidOrderOperationException("Não pode adicionar itens no status " + status);
+      throw new InvalidOrderException("Não pode adicionar itens no status " + status);
     }
 
     if (unitPrice.currency() != currency) {
@@ -80,14 +80,14 @@ public class Order {
 
   public void removeItem(MenuItemId menuItemId) {
     if (status != OrderStatus.CREATED) {
-      throw new InvalidOrderOperationException("Não pode remover itens no status " + status);
+      throw new InvalidOrderException("Não pode remover itens no status " + status);
     }
     items.removeIf(item -> item.getMenuItemId().equals(menuItemId));
   }
 
   public void changeDeliveryAddress(Address newAddress, Money newFee) {
     if (status != OrderStatus.CREATED) {
-      throw new InvalidOrderOperationException("Não pode mudar o endereço de entrega no status " + status);
+      throw new InvalidOrderException("Não pode mudar o endereço de entrega no status " + status);
     }
     if (newFee.currency() != currency) {
       throw new CurrencyMismatchException("A moeda da taxa de entrega deve ser a mesma do pedido.");
@@ -98,7 +98,7 @@ public class Order {
 
   public void registerPayment(PaymentId paymentId) {
     if (status != OrderStatus.CREATED) {
-      throw new InvalidOrderOperationException("Não é possível registrar pagamento no status " + status);
+      throw new InvalidOrderException("Não é possível registrar pagamento no status " + status);
     }
     Objects.requireNonNull(paymentId);
     payments.add(paymentId);
@@ -114,16 +114,16 @@ public class Order {
 
   public void markAsPaid() {
     if (status != OrderStatus.CREATED) {
-      throw new InvalidOrderOperationException("O pedido não pode ser pago no estado " + status);
+      throw new InvalidOrderException("O pedido não pode ser pago no estado " + status);
     }
     if (items.isEmpty()) {
-      throw new InvalidOrderOperationException("Pedido deve ter pelo menos um item.");
+      throw new InvalidOrderException("Pedido deve ter pelo menos um item.");
     }
     if (deliveryAddress == null) {
-      throw new InvalidOrderOperationException("Pedido deve ter um endereço de entrega.");
+      throw new InvalidOrderException("Pedido deve ter um endereço de entrega.");
     }
     if (total().isZero()) {
-      throw new InvalidOrderOperationException("Pedido Não pode ter total zero.");
+      throw new InvalidOrderException("Pedido Não pode ter total zero.");
     }
     status = OrderStatus.PAID;
     paidAt = LocalDateTime.now();
@@ -131,7 +131,7 @@ public class Order {
 
   public void markAsDelivered() {
     if (status != OrderStatus.CONFIRMED) {
-      throw new InvalidOrderOperationException("Pedido não pode ser entregue no estado " + status);
+      throw new InvalidOrderException("Pedido não pode ser entregue no estado " + status);
     }
     status = OrderStatus.DELIVERED;
     deliveredAt = LocalDateTime.now();
@@ -139,7 +139,7 @@ public class Order {
 
   public void confirm() {
     if (status != OrderStatus.PAID) {
-      throw new InvalidOrderOperationException("Apenas pedidos pagos podem ser confirmados.");
+      throw new InvalidOrderException("Apenas pedidos pagos podem ser confirmados.");
     }
     status = OrderStatus.CONFIRMED;
     confirmedAt = LocalDateTime.now();
@@ -147,7 +147,7 @@ public class Order {
 
   public void cancel() {
     if (status == OrderStatus.DELIVERED) {
-      throw new InvalidOrderOperationException("Pedidos entregues não podem ser cancelados.");
+      throw new InvalidOrderException("Pedidos entregues não podem ser cancelados.");
     }
     status = OrderStatus.CANCELLED;
     cancelledAt = LocalDateTime.now();
@@ -157,8 +157,8 @@ public class Order {
     return id;
   }
 
-  public ClientId getClientId() {
-    return clientId;
+  public AccountId getAccountId() {
+    return accountId;
   }
 
   public OrderStatus getStatus() {

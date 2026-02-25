@@ -1,4 +1,4 @@
-package br.com.delivery.domain.item;
+package br.com.delivery.domain.restaurant;
 
 import java.util.Objects;
 import java.util.UUID;

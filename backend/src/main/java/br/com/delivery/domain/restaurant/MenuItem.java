@@ -1,9 +1,8 @@
-package br.com.delivery.domain.item;
+package br.com.delivery.domain.restaurant;
 
 import java.util.Objects;
 
 import br.com.delivery.domain.exception.InactiveItemException;
-import br.com.delivery.domain.restaurant.RestaurantId;
 import br.com.delivery.domain.shared.Money;
 
 public final class MenuItem {

@@ -1,4 +1,4 @@
-package br.com.delivery.domain.item;
+package br.com.delivery.domain.restaurant;
 
 public enum MenuItemCategory {
   DESSERT,
