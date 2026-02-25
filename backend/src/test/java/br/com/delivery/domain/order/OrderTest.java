@@ -13,7 +13,8 @@ import br.com.delivery.domain.client.ClientId;
 import br.com.delivery.domain.exception.CurrencyMismatchException;
 import br.com.delivery.domain.exception.InvalidOrderOperationException;
 import br.com.delivery.domain.payment.PaymentId;
-import br.com.delivery.domain.product.ProductId;
+import br.com.delivery.domain.item.MenuItemCategory;
+import br.com.delivery.domain.item.MenuItemId;
 
 public class OrderTest {
   private final Address address = new Address("rua", "123", "casa", "cidade", "país", new ZipCode("36703-072"));
@@ -72,10 +73,10 @@ public class OrderTest {
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
-    ProductId productId = ProductId.generate();
+    MenuItemId menuItemId = MenuItemId.generate();
     Money price = Money.of(50.0, Currency.BRL);
 
-    order.addItem(productId, "produto 1", price, 2);
+    order.addItem(menuItemId, "item", "description", MenuItemCategory.DESSERT, price, 2);
 
     Money total = Money.of(100.0, Currency.BRL);
 
@@ -89,12 +90,12 @@ public class OrderTest {
     Currency brl = Currency.BRL;
     Order order = Order.create(clientId, brl);
 
-    ProductId productId = ProductId.generate();
+    MenuItemId menuItemId = MenuItemId.generate();
     Money price = Money.of(50.0, Currency.BRL);
 
-    order.addItem(productId, "produto 1", price, 2);
+    order.addItem(menuItemId, "product", "description", MenuItemCategory.DESSERT, price, 2);
 
-    order.removeItem(productId);
+    order.removeItem(menuItemId);
 
     assertEquals(0, order.getItems().size());
     assertTrue(order.getItems().isEmpty());
@@ -114,7 +115,10 @@ public class OrderTest {
   @Test
   void shouldTransitionThroughHappyPath() {
     Order order = Order.create(ClientId.generate(), Currency.CAD);
-    order.addItem(ProductId.generate(), "produto", Money.of(1.0, Currency.CAD), 1);
+
+    Money price = Money.of(50.0, Currency.BRL);
+    order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
+
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.CAD));
 
     order.markAsPaid();
@@ -130,8 +134,9 @@ public class OrderTest {
     Order order = Order.create(ClientId.generate(), Currency.CAD);
     order.cancel();
 
+    Money price = Money.of(50.0, Currency.BRL);
     assertThrows(InvalidOrderOperationException.class,
-        () -> order.addItem(ProductId.generate(), "Product", Money.of(10.0, Currency.BRL), 1));
+        () -> order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2));
   }
 
   @Test
@@ -172,7 +177,9 @@ public class OrderTest {
   @Test
   void shouldThrowWhenMarkingAsPaidWithoutAddress() {
     Order order = Order.create(ClientId.generate(), Currency.BRL);
-    order.addItem(ProductId.generate(), "product", Money.of(1.0, Currency.BRL), 1);
+
+    Money price = Money.of(50.0, Currency.BRL);
+    order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
 
     assertThrows(InvalidOrderOperationException.class,
         () -> order.markAsPaid());
@@ -183,14 +190,19 @@ public class OrderTest {
     Order order = Order.create(ClientId.generate(), Currency.BRL);
     List<OrderItem> items = order.getItems();
 
+    Money price = Money.of(50.0, Currency.BRL);
     assertThrows(UnsupportedOperationException.class,
-        () -> items.add(new OrderItem(ProductId.generate(), "Hack", Money.of(10.0, Currency.BRL), 1)));
+        () -> items
+            .add(new OrderItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2)));
   }
 
   @Test
   void shouldAllowCancelWhenStatusIsPaid() {
     Order order = Order.create(ClientId.generate(), Currency.BRL);
-    order.addItem(ProductId.generate(), "product", Money.of(1.0, Currency.BRL), 1);
+
+    Money price = Money.of(50.0, Currency.BRL);
+    order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
+
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL));
 
     order.cancel();
@@ -204,7 +216,7 @@ public class OrderTest {
     Money usdPrice = Money.of(10.0, Currency.USD);
 
     assertThrows(CurrencyMismatchException.class,
-        () -> order.addItem(ProductId.generate(), "imported", usdPrice, 10));
+        () -> order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, usdPrice, 2));
   }
 
   @Test
