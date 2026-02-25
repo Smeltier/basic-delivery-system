@@ -8,5 +8,7 @@ import br.com.delivery.domain.restaurantowner.RestaurantOwner;
 public interface IRestaurantOwnerRepository {
   Optional<RestaurantOwner> findById(AccountId id);
 
+  boolean existsById(AccountId id);
+
   void save(RestaurantOwner restaurantOwner);
 }
