@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import br.com.delivery.domain.exception.InsufficientFundsException;
-import br.com.delivery.domain.exception.InvalidMoneyOperationException;
+import br.com.delivery.domain.exception.InvalidMoneyException;
 import br.com.delivery.domain.exception.CurrencyMismatchException;
 
 public class MoneyTest {
   @Test
   void shouldThrowWhenValueIsNegative() {
-    assertThrows(InvalidMoneyOperationException.class,
+    assertThrows(InvalidMoneyException.class,
         () -> new Money(new BigDecimal("-10"), Currency.BRL));
   }
 

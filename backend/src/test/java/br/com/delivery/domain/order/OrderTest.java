@@ -11,10 +11,10 @@ import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.ZipCode;
 import br.com.delivery.domain.client.ClientId;
 import br.com.delivery.domain.exception.CurrencyMismatchException;
-import br.com.delivery.domain.exception.InvalidOrderOperationException;
+import br.com.delivery.domain.exception.InvalidOrderException;
 import br.com.delivery.domain.payment.PaymentId;
-import br.com.delivery.domain.item.MenuItemCategory;
-import br.com.delivery.domain.item.MenuItemId;
+import br.com.delivery.domain.restaurant.MenuItemCategory;
+import br.com.delivery.domain.restaurant.MenuItemId;
 
 public class OrderTest {
   private final Address address = new Address("rua", "123", "casa", "cidade", "país", new ZipCode("36703-072"));
@@ -135,7 +135,7 @@ public class OrderTest {
     order.cancel();
 
     Money price = Money.of(50.0, Currency.BRL);
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2));
   }
 
@@ -143,7 +143,7 @@ public class OrderTest {
   void shouldThrowWhenConfirmOutsidePaidStatus() {
     Order order = Order.create(ClientId.generate(), Currency.CAD);
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.confirm());
   }
 
@@ -152,7 +152,7 @@ public class OrderTest {
     Order order = Order.create(ClientId.generate(), Currency.CAD);
     order.cancel();
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 
@@ -161,7 +161,7 @@ public class OrderTest {
     Order order = Order.create(ClientId.generate(), Currency.BRL);
     order.cancel();
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL)));
   }
 
@@ -170,7 +170,7 @@ public class OrderTest {
     Order order = Order.create(ClientId.generate(), Currency.BRL);
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL));
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 
@@ -181,7 +181,7 @@ public class OrderTest {
     Money price = Money.of(50.0, Currency.BRL);
     order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
 
-    assertThrows(InvalidOrderOperationException.class,
+    assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
   }
 

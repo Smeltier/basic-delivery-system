@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
-import br.com.delivery.domain.item.MenuItem;
-import br.com.delivery.domain.item.MenuItemCategory;
+import br.com.delivery.domain.exception.InvalidRestaurantException;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
@@ -53,7 +51,7 @@ public class RestaurantTest {
   void shouldThrowWhenAddProductWithNullName() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.addMenuItem(null, "description", MenuItemCategory.DESSERT, money));
   }
 
@@ -61,7 +59,7 @@ public class RestaurantTest {
   void shouldThrowWhenAddProductWithNullUnitPrice() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, null));
   }
 
@@ -80,7 +78,7 @@ public class RestaurantTest {
     restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 15));
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.changeName("new name"));
   }
 
@@ -95,7 +93,7 @@ public class RestaurantTest {
   void shouldThrowWhenOpenRestaurantWithBlankMenu() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.openRestaurant(LocalTime.now()));
   }
 
@@ -103,7 +101,7 @@ public class RestaurantTest {
   void shouldThrowWhenChangeNameWithBlankString() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.changeName(""));
   }
 
@@ -121,7 +119,7 @@ public class RestaurantTest {
     restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
 
     LocalTime fakeTime = LocalTime.of(5, 10);
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.openRestaurant(fakeTime));
   }
 
@@ -130,7 +128,7 @@ public class RestaurantTest {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
     restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.now());
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.openRestaurant(LocalTime.now()));
   }
 
@@ -199,7 +197,7 @@ public class RestaurantTest {
     MenuItem item = restaurant.getMenu().get(0);
     restaurant.openRestaurant(LocalTime.of(10, 0));
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.removeMenuItem(item.getId()));
   }
 
@@ -219,7 +217,7 @@ public class RestaurantTest {
     restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 5));
 
-    assertThrows(InvalidRestaurantOperationException.class,
+    assertThrows(InvalidRestaurantException.class,
         () -> restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money));
   }
 }

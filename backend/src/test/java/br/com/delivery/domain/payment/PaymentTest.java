@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import br.com.delivery.domain.order.OrderId;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
-import br.com.delivery.domain.exception.InvalidPaymentOperationException;
+import br.com.delivery.domain.exception.InvalidPaymentException;
 
 public class PaymentTest {
   private final Money amount = new Money(BigDecimal.TEN, Currency.BRL);
@@ -25,7 +25,7 @@ public class PaymentTest {
     Payment payment = Payment.create(OrderId.generate(), this.fakeApprovedMethod, this.amount);
     payment.process();
 
-    assertThrows(InvalidPaymentOperationException.class,
+    assertThrows(InvalidPaymentException.class,
         () -> payment.cancel());
   }
 
@@ -34,7 +34,7 @@ public class PaymentTest {
     Payment payment = Payment.create(OrderId.generate(), this.fakeApprovedMethod, this.amount);
     payment.process();
 
-    assertThrows(InvalidPaymentOperationException.class,
+    assertThrows(InvalidPaymentException.class,
         () -> payment.process());
   }
 
@@ -43,7 +43,7 @@ public class PaymentTest {
     Payment payment = Payment.create(OrderId.generate(), this.fakeRejectedMethod, this.amount);
     payment.process();
 
-    assertThrows(InvalidPaymentOperationException.class,
+    assertThrows(InvalidPaymentException.class,
         () -> payment.refund());
   }
 

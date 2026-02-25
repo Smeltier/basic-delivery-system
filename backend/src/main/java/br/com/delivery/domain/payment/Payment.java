@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.order.OrderId;
-import br.com.delivery.domain.exception.InvalidPaymentOperationException;
+import br.com.delivery.domain.exception.InvalidPaymentException;
 
 public final class Payment {
   private final PaymentId id;
@@ -27,7 +27,7 @@ public final class Payment {
 
   public void process() {
     if (status != PaymentStatus.PENDING) {
-      throw new InvalidPaymentOperationException("O pagamento não pode ser processado no estado " + status);
+      throw new InvalidPaymentException("O pagamento não pode ser processado no estado " + status);
     }
 
     PaymentProcessingResult result = paymentMethod.process(this);
@@ -41,14 +41,14 @@ public final class Payment {
 
   public void cancel() {
     if (status != PaymentStatus.PENDING) {
-      throw new InvalidPaymentOperationException("Só pagamentos pendentes podem ser cancelados.");
+      throw new InvalidPaymentException("Só pagamentos pendentes podem ser cancelados.");
     }
     changeStatus(PaymentStatus.CANCELLED);
   }
 
   public void refund() {
     if (status != PaymentStatus.APPROVED) {
-      throw new InvalidPaymentOperationException("Só pagamentos aprovados podem ser reembolsados.");
+      throw new InvalidPaymentException("Só pagamentos aprovados podem ser reembolsados.");
     }
     changeStatus(PaymentStatus.REFUNDED);
   }
