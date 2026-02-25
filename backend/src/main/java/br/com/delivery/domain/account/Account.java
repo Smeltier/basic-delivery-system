@@ -3,10 +3,8 @@ package br.com.delivery.domain.account;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
-import br.com.delivery.domain.shared.Cpf;
 import br.com.delivery.domain.shared.Email;
 import br.com.delivery.domain.exception.InactiveAccountException;
 import br.com.delivery.domain.exception.InvalidClientException;
