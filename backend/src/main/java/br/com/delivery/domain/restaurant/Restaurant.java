@@ -7,8 +7,9 @@ import java.util.Collections;
 import java.util.List;
 
 import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
-import br.com.delivery.domain.product.Product;
-import br.com.delivery.domain.product.ProductId;
+import br.com.delivery.domain.item.MenuItem;
+import br.com.delivery.domain.item.MenuItemCategory;
+import br.com.delivery.domain.item.MenuItemId;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Money;
 
@@ -16,7 +17,7 @@ import br.com.delivery.domain.shared.Money;
 
 public final class Restaurant {
   private final RestaurantId id;
-  private final List<Product> menu;
+  private final List<MenuItem> menu;
   private String name;
   private RestaurantStatus status;
   private OpeningHours openingHours;
@@ -36,17 +37,20 @@ public final class Restaurant {
     return new Restaurant(RestaurantId.generate(), name, openingHours, address);
   }
 
-  public static Restaurant restore(RestaurantId id, String name, OpeningHours openingHours, Address address) {
+  public static Restaurant restore(RestaurantId id, String name, OpeningHours openingHours, Address address,
+      RestaurantStatus status, List<MenuItem> menu) {
     Restaurant restaurant = new Restaurant(id, name, openingHours, address);
+    restaurant.status = status;
+    restaurant.menu.addAll(menu);
     return restaurant;
   }
 
-  public void addItem(String productName, Money unitPrice) {
+  public void addMenuItem(String itemName, String itemDescription, MenuItemCategory category, Money unitPrice) {
     if (status != RestaurantStatus.CLOSED) {
       throw new InvalidRestaurantOperationException("Não pode adicionar itens com o restaurante ainda aberto.");
     }
 
-    if (productName == null) {
+    if (itemName == null) {
       throw new InvalidRestaurantOperationException("Nome do produto não deve ser nulo.");
     }
 
@@ -54,11 +58,11 @@ public final class Restaurant {
       throw new InvalidRestaurantOperationException("Preço unitário do produto não deve ser nulo.");
     }
 
-    Product product = Product.create(productName, unitPrice);
-    this.menu.add(product);
+    MenuItem item = new MenuItem(MenuItemId.generate(), id, itemName, itemDescription, category, unitPrice);
+    this.menu.add(item);
   }
 
-  public void removeItem(ProductId productId) {
+  public void removeMenuItem(MenuItemId productId) {
     if (status != RestaurantStatus.CLOSED) {
       throw new InvalidRestaurantOperationException("Não pode remover itens com o restaurante ainda aberto.");
     }
@@ -128,7 +132,7 @@ public final class Restaurant {
     return openingHours.close();
   }
 
-  public List<Product> getMenu() {
+  public List<MenuItem> getMenu() {
     return Collections.unmodifiableList(menu);
   }
 
