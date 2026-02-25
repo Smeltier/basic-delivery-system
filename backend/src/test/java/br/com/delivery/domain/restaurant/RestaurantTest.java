@@ -2,13 +2,11 @@ package br.com.delivery.domain.restaurant;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
-import br.com.delivery.domain.item.MenuItemId;
 import br.com.delivery.domain.item.MenuItem;
 import br.com.delivery.domain.item.MenuItemCategory;
 import br.com.delivery.domain.shared.Address;
