@@ -4,10 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import br.com.delivery.domain.exception.InactiveItemException;
-import br.com.delivery.domain.restaurant.MenuItem;
-import br.com.delivery.domain.restaurant.MenuItemCategory;
-import br.com.delivery.domain.restaurant.MenuItemId;
-import br.com.delivery.domain.restaurant.RestaurantId;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
 
