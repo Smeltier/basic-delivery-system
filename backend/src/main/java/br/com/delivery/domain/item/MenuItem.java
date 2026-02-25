@@ -28,7 +28,6 @@ public final class MenuItem {
   }
 
   public Money currentPrice() {
-    assertActive();
     return price;
   }
 
