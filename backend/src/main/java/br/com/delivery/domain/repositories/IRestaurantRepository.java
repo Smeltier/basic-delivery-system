@@ -1,4 +1,16 @@
 package br.com.delivery.domain.repositories;
 
-public class IRestaurantRepository {
+import java.util.List;
+import java.util.Optional;
+
+import br.com.delivery.domain.account.AccountId;
+import br.com.delivery.domain.restaurant.Restaurant;
+import br.com.delivery.domain.restaurant.RestaurantId;
+
+public interface IRestaurantRepository {
+  Optional<Restaurant> findById(RestaurantId id);
+
+  List<Restaurant> findAllByOwnerId(AccountId ownerId);
+
+  void save(Restaurant restaurant);
 }
