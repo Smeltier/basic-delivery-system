@@ -157,7 +157,7 @@ public class Order {
     return id;
   }
 
-  public AccountId getaccountId() {
+  public AccountId getAccountId() {
     return accountId;
   }
 
