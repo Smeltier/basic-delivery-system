@@ -12,5 +12,7 @@ public interface IRestaurantRepository {
 
   List<Restaurant> findAllByOwnerId(AccountId ownerId);
 
+  boolean existsById(AccountId id);
+
   void save(Restaurant restaurant);
 }
