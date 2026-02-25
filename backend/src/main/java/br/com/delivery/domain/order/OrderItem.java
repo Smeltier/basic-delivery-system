@@ -12,6 +12,7 @@ public class OrderItem {
   private final MenuItemId menuItemId;
   private final String menuItemName;
   private final String menuItemDescription;
+  private final MenuItemCategory menuItemCategory;
   private final Money unitPrice;
   private final int quantity;
 
@@ -38,6 +39,7 @@ public class OrderItem {
     this.menuItemId = menuItemId;
     this.menuItemName = menuItemName;
     this.menuItemDescription = menuItemDescription;
+    this.menuItemCategory = category;
     this.unitPrice = unitPrice;
     this.quantity = quantity;
   }
@@ -56,6 +58,10 @@ public class OrderItem {
 
   public String getMenuItemDescription() {
     return menuItemDescription;
+  }
+
+  public MenuItemCategory getMenuItemCategory() {
+    return this.menuItemCategory;
   }
 
   public Money getUnitPrice() {
