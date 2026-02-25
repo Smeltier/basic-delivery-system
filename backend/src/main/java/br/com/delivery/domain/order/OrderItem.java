@@ -2,25 +2,45 @@ package br.com.delivery.domain.order;
 
 import java.util.Objects;
 
-import br.com.delivery.domain.product.ProductId;
+import br.com.delivery.domain.item.MenuItemCategory;
+import br.com.delivery.domain.item.MenuItemId;
 import br.com.delivery.domain.shared.Money;
+import br.com.delivery.domain.exception.InvalidOrderItemException;
+import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
 
 public class OrderItem {
-  private final ProductId productId;
-  private final String productName;
+  private final MenuItemId menuItemId;
+  private final String menuItemName;
+  private final String menuItemDescription;
+  private final MenuItemCategory menuItemCategory;
   private final Money unitPrice;
   private final int quantity;
 
-  public OrderItem(ProductId productId, String productName, Money unitPrice, int quantity) {
-    if (productName.isBlank()) {
-      throw new IllegalArgumentException("Nome do produto inválido");
+  public OrderItem(MenuItemId menuItemId, String menuItemName, String menuItemDescription, MenuItemCategory category,
+      Money unitPrice, int quantity) {
+    Objects.requireNonNull(menuItemId);
+    Objects.requireNonNull(menuItemName);
+    Objects.requireNonNull(menuItemDescription);
+    Objects.requireNonNull(category);
+    Objects.requireNonNull(unitPrice);
+
+    if (menuItemName.isBlank()) {
+      throw new InvalidOrderItemException("Nome não pode ser vazio.");
     }
+
+    if (menuItemDescription.isBlank()) {
+      throw new InvalidOrderItemException("Descrição não pode ser vazia.");
+    }
+
     if (quantity <= 0) {
-      throw new IllegalArgumentException("Quantidade inválida.");
+      throw new InvalidOrderItemQuantityException("Quantidade inválida.");
     }
-    this.productId = Objects.requireNonNull(productId);
-    this.productName = Objects.requireNonNull(productName);
-    this.unitPrice = Objects.requireNonNull(unitPrice);
+
+    this.menuItemId = menuItemId;
+    this.menuItemName = menuItemName;
+    this.menuItemDescription = menuItemDescription;
+    this.menuItemCategory = category;
+    this.unitPrice = unitPrice;
     this.quantity = quantity;
   }
 
@@ -28,12 +48,20 @@ public class OrderItem {
     return unitPrice.multiply(quantity);
   }
 
-  public ProductId getProductId() {
-    return productId;
+  public MenuItemId getMenuItemId() {
+    return menuItemId;
   }
 
-  public String getProductName() {
-    return productName;
+  public String getMenuItemName() {
+    return menuItemName;
+  }
+
+  public String getMenuItemDescription() {
+    return menuItemDescription;
+  }
+
+  public MenuItemCategory getMenuItemCategory() {
+    return this.menuItemCategory;
   }
 
   public Money getUnitPrice() {

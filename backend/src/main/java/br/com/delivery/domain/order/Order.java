@@ -14,7 +14,8 @@ import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.payment.PaymentId;
-import br.com.delivery.domain.product.ProductId;
+import br.com.delivery.domain.item.MenuItemCategory;
+import br.com.delivery.domain.item.MenuItemId;
 
 public class Order {
   private final OrderId id;
@@ -62,22 +63,26 @@ public class Order {
     return order;
   }
 
-  public void addItem(ProductId productId, String productName, Money unitPrice, int quantity) {
+  public void addItem(MenuItemId menuItemId, String menuItemName, String description, MenuItemCategory category,
+      Money unitPrice, int quantity) {
+
     if (status != OrderStatus.CREATED) {
       throw new InvalidOrderOperationException("Não pode adicionar itens no status " + status);
     }
+
     if (unitPrice.currency() != currency) {
       throw new CurrencyMismatchException("Não pode adicionar produtos com moedas diferentes.");
     }
-    OrderItem item = new OrderItem(productId, productName, unitPrice, quantity);
+
+    OrderItem item = new OrderItem(menuItemId, menuItemName, description, category, unitPrice, quantity);
     items.add(item);
   }
 
-  public void removeItem(ProductId productId) {
+  public void removeItem(MenuItemId menuItemId) {
     if (status != OrderStatus.CREATED) {
       throw new InvalidOrderOperationException("Não pode remover itens no status " + status);
     }
-    items.removeIf(item -> item.getProductId().equals(productId));
+    items.removeIf(item -> item.getMenuItemId().equals(menuItemId));
   }
 
   public void changeDeliveryAddress(Address newAddress, Money newFee) {

@@ -3,20 +3,22 @@ package br.com.delivery.domain.item;
 import java.util.Objects;
 
 import br.com.delivery.domain.exception.InactiveItemException;
+import br.com.delivery.domain.restaurant.RestaurantId;
 import br.com.delivery.domain.shared.Money;
 
-// TODO: Add RestaurantId.
-
-public class MenuItem {
+public final class MenuItem {
   private final MenuItemId id;
+  private final RestaurantId restaurantId;
   private String name;
   private String description;
   private MenuItemCategory category;
   private Money price;
   private boolean active;
 
-  private MenuItem(MenuItemId id, String name, String description, MenuItemCategory category, Money price) {
+  public MenuItem(MenuItemId id, RestaurantId restaurantId, String name, String description, MenuItemCategory category,
+      Money price) {
     this.id = Objects.requireNonNull(id);
+    this.restaurantId = Objects.requireNonNull(restaurantId);
     this.price = Objects.requireNonNull(price);
     this.active = true;
 
@@ -25,12 +27,7 @@ public class MenuItem {
     changeCategory(category);
   }
 
-  public static MenuItem create(String name, String description, MenuItemCategory category, Money price) {
-    return new MenuItem(MenuItemId.generate(), name, description, category, price);
-  }
-
   public Money currentPrice() {
-    assertActive();
     return price;
   }
 
@@ -38,34 +35,6 @@ public class MenuItem {
     Objects.requireNonNull(newPrice);
     assertActive();
     this.price = newPrice;
-  }
-
-  public void deactivate() {
-    this.active = false;
-  }
-
-  public void activate() {
-    this.active = true;
-  }
-
-  public boolean isActive() {
-    return this.active;
-  }
-
-  public MenuItemId getId() {
-    return id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public MenuItemCategory getCategory() {
-    return category;
   }
 
   public void changeName(String newName) {
@@ -86,6 +55,38 @@ public class MenuItem {
 
   public void changeCategory(MenuItemCategory newCategory) {
     this.category = Objects.requireNonNull(newCategory);
+  }
+
+  public void activate() {
+    this.active = true;
+  }
+
+  public void deactivate() {
+    this.active = false;
+  }
+
+  public boolean isActive() {
+    return this.active;
+  }
+
+  public MenuItemId getId() {
+    return id;
+  }
+
+  public RestaurantId getRestaurantId() {
+    return restaurantId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public MenuItemCategory getCategory() {
+    return category;
   }
 
   private void assertActive() {

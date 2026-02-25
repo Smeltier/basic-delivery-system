@@ -1,13 +1,14 @@
 package br.com.delivery.domain.restaurant;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import br.com.delivery.domain.exception.InvalidRestaurantOperationException;
-import br.com.delivery.domain.product.ProductId;
-import br.com.delivery.domain.product.Product;
+import br.com.delivery.domain.item.MenuItem;
+import br.com.delivery.domain.item.MenuItemCategory;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
@@ -19,11 +20,12 @@ public class RestaurantTest {
   private final OpeningHours hours = new OpeningHours(open, close);
   private final ZipCode zipCode = new ZipCode("36704-072");
   private final Address address = new Address("street", "2", "House", "city", "country", zipCode);
+  private final Money money = Money.of(10, Currency.BRL);
 
   @Test
   void shouldOpenRestaurantSuccessfully() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 5));
 
     assertTrue(restaurant.isOpen());
@@ -32,7 +34,7 @@ public class RestaurantTest {
   @Test
   void shouldCloseRestaurantSuccessfully() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 5));
     restaurant.closeRestaurant();
 
@@ -42,7 +44,7 @@ public class RestaurantTest {
   @Test
   void shouldAddProductSuccessfully() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
 
     assertEquals(1, restaurant.getMenu().size());
   }
@@ -52,7 +54,7 @@ public class RestaurantTest {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
     assertThrows(InvalidRestaurantOperationException.class,
-        () -> restaurant.addItem(null, Money.of(10, Currency.BRL)));
+        () -> restaurant.addMenuItem(null, "description", MenuItemCategory.DESSERT, money));
   }
 
   @Test
@@ -60,7 +62,7 @@ public class RestaurantTest {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
 
     assertThrows(InvalidRestaurantOperationException.class,
-        () -> restaurant.addItem("product", null));
+        () -> restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, null));
   }
 
   @Test
@@ -75,7 +77,7 @@ public class RestaurantTest {
   @Test
   void shouldThrowWhenChangeNameWhileOpen() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 15));
 
     assertThrows(InvalidRestaurantOperationException.class,
@@ -116,7 +118,7 @@ public class RestaurantTest {
   @Test
   void shouldThrowWhenOpenRestaurantOutsideWorkTime() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
 
     LocalTime fakeTime = LocalTime.of(5, 10);
     assertThrows(InvalidRestaurantOperationException.class,
@@ -126,7 +128,7 @@ public class RestaurantTest {
   @Test
   void shouldThrowWhenOpenAOpenedRestaurant() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.now());
     assertThrows(InvalidRestaurantOperationException.class,
         () -> restaurant.openRestaurant(LocalTime.now()));
@@ -135,8 +137,10 @@ public class RestaurantTest {
   @Test
   void shouldBeEqualWhenSameId() {
     RestaurantId id = RestaurantId.generate();
-    Restaurant r1 = Restaurant.restore(id, "restaurant1", hours, address);
-    Restaurant r2 = Restaurant.restore(id, "restaurant2", hours, address);
+    Restaurant r1 = Restaurant.restore(id, "restaurant1", hours, address, RestaurantStatus.OPEN,
+        new ArrayList<MenuItem>());
+    Restaurant r2 = Restaurant.restore(id, "restaurant1", hours, address, RestaurantStatus.OPEN,
+        new ArrayList<MenuItem>());
 
     assertEquals(r1, r2);
   }
@@ -153,7 +157,8 @@ public class RestaurantTest {
   void shouldRestoreRestaurant() {
     RestaurantId id = RestaurantId.generate();
 
-    Restaurant restaurant = Restaurant.restore(id, "restaurant", hours, address);
+    Restaurant restaurant = Restaurant.restore(id, "restaurant1", hours, address, RestaurantStatus.OPEN,
+        new ArrayList<MenuItem>());
 
     assertEquals(id, restaurant.getId());
   }
@@ -179,10 +184,10 @@ public class RestaurantTest {
   @Test
   void shouldRemoveItemSuccessfully() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
-    Product product = restaurant.getMenu().get(0);
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
+    MenuItem item = restaurant.getMenu().get(0);
 
-    restaurant.removeItem(product.getId());
+    restaurant.removeMenuItem(item.getId());
 
     assertTrue(restaurant.getMenu().isEmpty());
   }
@@ -190,31 +195,31 @@ public class RestaurantTest {
   @Test
   void shouldThrowWhenRemoveItemWhileOpen() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
-    Product product = restaurant.getMenu().get(0);
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
+    MenuItem item = restaurant.getMenu().get(0);
     restaurant.openRestaurant(LocalTime.of(10, 0));
 
     assertThrows(InvalidRestaurantOperationException.class,
-        () -> restaurant.removeItem(product.getId()));
+        () -> restaurant.removeMenuItem(item.getId()));
   }
 
   @Test
   void shouldNotThrowWhenRemoveNonexistentItem() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product", Money.of(5, Currency.BRL));
-    Product product = restaurant.getMenu().get(0);
-    restaurant.removeItem(product.getId());
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
+    MenuItem item = restaurant.getMenu().get(0);
+    restaurant.removeMenuItem(item.getId());
 
-    assertDoesNotThrow(() -> restaurant.removeItem(product.getId()));
+    assertDoesNotThrow(() -> restaurant.removeMenuItem(item.getId()));
   }
 
   @Test
   void shouldThrowWhenAddItemWhileOpen() {
     Restaurant restaurant = Restaurant.create("restaurant", hours, address);
-    restaurant.addItem("product1", Money.of(5, Currency.BRL));
+    restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
     restaurant.openRestaurant(LocalTime.of(10, 5));
 
     assertThrows(InvalidRestaurantOperationException.class,
-        () -> restaurant.addItem("product2", Money.of(10, Currency.BRL)));
+        () -> restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money));
   }
 }
