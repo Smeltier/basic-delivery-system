@@ -37,12 +37,32 @@ public final class MenuItem {
     this.price = newPrice;
   }
 
-  public void deactivate() {
-    this.active = false;
+  public void changeName(String newName) {
+    Objects.requireNonNull(newName);
+    if (newName.isBlank()) {
+      throw new IllegalArgumentException("Nome inválido.");
+    }
+    this.name = newName;
+  }
+
+  public void changeDescription(String newDescription) {
+    Objects.requireNonNull(newDescription);
+    if (newDescription.isBlank()) {
+      throw new IllegalArgumentException("Descrição inválida.");
+    }
+    this.description = newDescription;
+  }
+
+  public void changeCategory(MenuItemCategory newCategory) {
+    this.category = Objects.requireNonNull(newCategory);
   }
 
   public void activate() {
     this.active = true;
+  }
+
+  public void deactivate() {
+    this.active = false;
   }
 
   public boolean isActive() {
@@ -67,26 +87,6 @@ public final class MenuItem {
 
   public MenuItemCategory getCategory() {
     return category;
-  }
-
-  public void changeName(String newName) {
-    Objects.requireNonNull(newName);
-    if (newName.isBlank()) {
-      throw new IllegalArgumentException("Nome inválido.");
-    }
-    this.name = newName;
-  }
-
-  public void changeDescription(String newDescription) {
-    Objects.requireNonNull(newDescription);
-    if (newDescription.isBlank()) {
-      throw new IllegalArgumentException("Descrição inválida.");
-    }
-    this.description = newDescription;
-  }
-
-  public void changeCategory(MenuItemCategory newCategory) {
-    this.category = Objects.requireNonNull(newCategory);
   }
 
   private void assertActive() {
