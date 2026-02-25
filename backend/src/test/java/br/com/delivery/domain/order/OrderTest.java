@@ -116,7 +116,7 @@ public class OrderTest {
   void shouldTransitionThroughHappyPath() {
     Order order = Order.create(ClientId.generate(), Currency.CAD);
 
-    Money price = Money.of(50.0, Currency.BRL);
+    Money price = Money.of(50.0, Currency.CAD);
     order.addItem(MenuItemId.generate(), "product", "description", MenuItemCategory.DESSERT, price, 2);
 
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.CAD));
