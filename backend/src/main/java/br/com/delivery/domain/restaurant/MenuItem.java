@@ -88,7 +88,7 @@ public final class MenuItem {
     return category;
   }
 
-  private void assertActive() {
+  public void assertActive() {
     if (!this.active) {
       throw new InactiveItemException("Item inativo.");
     }

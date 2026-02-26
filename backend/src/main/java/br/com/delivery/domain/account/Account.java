@@ -51,6 +51,12 @@ public final class Account {
     this.roles.add(Objects.requireNonNull(newRole));
   }
 
+  public void assertCanPlaceOrder() {
+    if (!this.active) {
+      throw new InactiveAccountException("Conta inativa");
+    }
+  }
+
   public boolean isActive() {
     return this.active;
   }

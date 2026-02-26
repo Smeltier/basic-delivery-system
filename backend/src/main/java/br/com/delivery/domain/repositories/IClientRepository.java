@@ -8,5 +8,7 @@ import br.com.delivery.domain.client.Client;
 public interface IClientRepository {
   Optional<Client> findById(AccountId id);
 
+  boolean existsById(AccountId id);
+
   void save(Client client);
 }
