@@ -3,7 +3,7 @@ package br.com.delivery.application.usecases.order;
 import java.util.Objects;
 
 import br.com.delivery.application.dto.order.AddItemToCartInput;
-import br.com.delivery.application.dto.order.CreateOrderOutput;
+import br.com.delivery.application.dto.order.AddItemToCartOutput;
 import br.com.delivery.application.exceptions.AccountNotFoundException;
 import br.com.delivery.application.exceptions.MenuItemNotFoundException;
 import br.com.delivery.application.exceptions.RestaurantNotFoundException;
@@ -29,7 +29,7 @@ public final class AddItemToCartUseCase {
     this.orderRepository = Objects.requireNonNull(orderRepository);
   }
 
-  public CreateOrderOutput execute(AddItemToCartInput input) {
+  public AddItemToCartOutput execute(AddItemToCartInput input) {
     AccountId accountId = input.accountId();
     RestaurantId restaurantId = input.restaurantId();
     MenuItemId menuItemId = input.menuItemId();
@@ -52,6 +52,6 @@ public final class AddItemToCartUseCase {
     order.addItem(menuItemId, item.getName(), item.getDescription(), item.getCategory(), item.currentPrice(), quantity);
     
     orderRepository.save(order);
-    return new CreateOrderOutput(order.getId());
+    return new AddItemToCartOutput(order.getId());
   }
 }
