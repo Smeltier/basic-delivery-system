@@ -137,10 +137,8 @@ public class RestaurantTest {
   @Test
   void shouldBeEqualWhenSameId() {
     RestaurantId id = RestaurantId.generate();
-    Restaurant r1 = Restaurant.restore(id, ownerId, "restaurant1", hours, address, RestaurantStatus.OPEN,
-        new ArrayList<MenuItem>());
-    Restaurant r2 = Restaurant.restore(id, ownerId, "restaurant1", hours, address, RestaurantStatus.OPEN,
-        new ArrayList<MenuItem>());
+    Restaurant r1 = Restaurant.restore(id, ownerId, "restaurant1", hours, address, Currency.BRL, RestaurantStatus.OPEN, new ArrayList<MenuItem>());
+    Restaurant r2 = Restaurant.restore(id, ownerId, "restaurant1", hours, address, Currency.BRL, RestaurantStatus.OPEN, new ArrayList<MenuItem>());
 
     assertEquals(r1, r2);
   }
@@ -157,8 +155,7 @@ public class RestaurantTest {
   void shouldRestoreRestaurant() {
     RestaurantId id = RestaurantId.generate();
 
-    Restaurant restaurant = Restaurant.restore(id, ownerId, "restaurant1", hours, address, RestaurantStatus.OPEN,
-        new ArrayList<MenuItem>());
+    Restaurant restaurant = Restaurant.restore(id, ownerId, "restaurant1", hours, address, Currency.BRL, RestaurantStatus.OPEN, new ArrayList<MenuItem>());
 
     assertEquals(id, restaurant.getId());
   }
