@@ -11,6 +11,7 @@ public record Money(BigDecimal amount, Currency currency) {
   public Money {
     Objects.requireNonNull(amount);
     Objects.requireNonNull(currency);
+
     if (amount.compareTo(BigDecimal.ZERO) < 0) {
       throw new InvalidMoneyException("A quantidade não pode ser negativa.");
     }
@@ -38,6 +39,7 @@ public record Money(BigDecimal amount, Currency currency) {
     if (this.amount.compareTo(value.amount) < 0) {
       throw new InsufficientFundsException("Saldo insuficiente.");
     }
+
     return new Money(this.amount.subtract(value.amount), this.currency);
   }
 
@@ -45,6 +47,7 @@ public record Money(BigDecimal amount, Currency currency) {
     if (factor < 0) {
       throw new InvalidMoneyException("O fator não pode ser negativo.");
     }
+
     return new Money(this.amount.multiply(BigDecimal.valueOf(factor)), this.currency);
   }
 
@@ -60,5 +63,23 @@ public record Money(BigDecimal amount, Currency currency) {
     if (!this.currency.equals(value.currency)) {
       throw new CurrencyMismatchException("Moedas diferentes.");
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof Money money)) {
+      return false;
+    }
+
+    return amount.compareTo(money.amount) == 0 && currency == money.currency;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(amount.stripTrailingZeros(), currency);
   }
 }
