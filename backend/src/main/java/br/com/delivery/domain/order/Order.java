@@ -9,6 +9,8 @@ import java.util.Collections;
 
 import br.com.delivery.domain.exception.CurrencyMismatchException;
 import br.com.delivery.domain.exception.InvalidOrderException;
+import br.com.delivery.domain.exception.InvalidOrderItemException;
+import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.Currency;
@@ -34,7 +36,8 @@ public class Order {
   private Money deliveryFee;
   private OrderStatus status;
 
-  private Order(OrderId id, RestaurantId restaurantId, AccountId accountId, Currency currency, LocalDateTime createdAt) {
+  private Order(OrderId id, RestaurantId restaurantId, AccountId accountId, Currency currency,
+      LocalDateTime createdAt) {
     this.id = Objects.requireNonNull(id);
     this.restaurantId = Objects.requireNonNull(restaurantId);
     this.accountId = Objects.requireNonNull(accountId);
@@ -50,7 +53,10 @@ public class Order {
     return new Order(OrderId.generate(), restaurantId, accountId, currency, LocalDateTime.now());
   }
 
-  public static Order restore(OrderId id, RestaurantId restaurantId,  AccountId accountId, Currency currency, LocalDateTime createdAt, OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address, Money deliveryFee, LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt, LocalDateTime deliveredAt) {
+  public static Order restore(OrderId id, RestaurantId restaurantId, AccountId accountId, Currency currency,
+      LocalDateTime createdAt, OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address,
+      Money deliveryFee, LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt,
+      LocalDateTime deliveredAt) {
     Order order = new Order(id, restaurantId, accountId, currency, createdAt);
     order.status = status;
     order.items.addAll(items);
@@ -75,24 +81,66 @@ public class Order {
       throw new CurrencyMismatchException("Não pode adicionar produtos com moedas diferentes.");
     }
 
-    OrderItem item = new OrderItem(menuItemId, menuItemName, description, category, unitPrice, quantity);
-    items.add(item);
+    OrderItem existingItem = items.stream()
+        .filter(item -> item.getMenuItemId().equals(menuItemId))
+        .findFirst()
+        .orElse(null);
+
+    if (existingItem == null) {
+      OrderItem item = new OrderItem(menuItemId, menuItemName, description, category, unitPrice, quantity);
+      items.add(item);
+      return;
+    }
+
+    items.removeIf(item -> item.getMenuItemId().equals(menuItemId));
+    int newQuantity = existingItem.getQuantity() + quantity;
+    OrderItem updatedItem = new OrderItem(menuItemId, menuItemName, description, category, unitPrice, newQuantity);
+    items.add(updatedItem);
   }
 
-  public void removeItem(MenuItemId menuItemId) {
+  public void decreaseItem(MenuItemId menuItemId, int quantity) {
     if (status != OrderStatus.DRAFT) {
-      throw new InvalidOrderException("Não pode remover itens no status " + status);
+      throw new InvalidOrderException("Não pode remover  itens no status: " + status);
     }
-    items.removeIf(item -> item.getMenuItemId().equals(menuItemId));
+
+    if (quantity <= 0) {
+      throw new InvalidOrderItemQuantityException("A quantidade deve ser positiva.");
+    }
+
+    OrderItem existingItem = items.stream()
+        .filter(item -> item.getMenuItemId().equals(menuItemId))
+        .findFirst()
+        .orElseThrow(() -> new InvalidOrderException("Item inexistente."));
+
+    int newQuantity = existingItem.getQuantity() - quantity;
+
+    if (newQuantity < 0) {
+      throw new InvalidOrderItemException("A quantidade final não pode ser negativa.");
+    }
+
+    items.remove(existingItem);
+
+    if (newQuantity > 0) {
+      OrderItem updatedItem = new OrderItem(
+          menuItemId,
+          existingItem.getMenuItemName(),
+          existingItem.getMenuItemDescription(),
+          existingItem.getMenuItemCategory(),
+          existingItem.getUnitPrice(),
+          newQuantity);
+      items.add(updatedItem);
+    }
   }
 
   public void changeDeliveryAddress(Address newAddress, Money newFee) {
     if (status != OrderStatus.DRAFT) {
       throw new InvalidOrderException("Não pode mudar o endereço de entrega no status " + status);
     }
+
     if (newFee.currency() != currency) {
       throw new CurrencyMismatchException("A moeda da taxa de entrega deve ser a mesma do pedido.");
     }
+
     this.deliveryAddress = Objects.requireNonNull(newAddress);
     this.deliveryFee = Objects.requireNonNull(newFee);
   }
@@ -138,7 +186,7 @@ public class Order {
     deliveredAt = LocalDateTime.now();
   }
 
-  public void confirm() {
+  public void markAsConfirmed() {
     if (status != OrderStatus.PAID) {
       throw new InvalidOrderException("Apenas pedidos pagos podem ser confirmados.");
     }
@@ -146,7 +194,7 @@ public class Order {
     confirmedAt = LocalDateTime.now();
   }
 
-  public void cancel() {
+  public void markAsCancelled() {
     if (status == OrderStatus.DELIVERED) {
       throw new InvalidOrderException("Pedidos entregues não podem ser cancelados.");
     }
@@ -209,4 +257,5 @@ public class Order {
   public Optional<LocalDateTime> getPaidAt() {
     return Optional.ofNullable(paidAt);
   }
+
 }
