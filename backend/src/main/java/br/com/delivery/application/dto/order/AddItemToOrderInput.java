@@ -7,8 +7,8 @@ import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
 import br.com.delivery.domain.restaurant.MenuItemId;
 import br.com.delivery.domain.restaurant.RestaurantId;
 
-public record AddItemToCartInput(AccountId accountId, RestaurantId restaurantId, MenuItemId menuItemId, int quantity) {
-  public AddItemToCartInput {
+public record AddItemToOrderInput(AccountId accountId, RestaurantId restaurantId, MenuItemId menuItemId, int quantity) {
+  public AddItemToOrderInput {
     accountId = Objects.requireNonNull(accountId);
     restaurantId = Objects.requireNonNull(restaurantId);
     menuItemId = Objects.requireNonNull(menuItemId);

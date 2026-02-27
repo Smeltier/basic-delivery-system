@@ -104,7 +104,7 @@ public class OrderTest {
 
     order.addItem(menuItemId, "product", "description", MenuItemCategory.DESSERT, price, 2);
 
-    order.removeItem(menuItemId);
+    order.decreaseItem(menuItemId, 2);
 
     assertEquals(0, order.getItems().size());
     assertTrue(order.getItems().isEmpty());
@@ -133,7 +133,7 @@ public class OrderTest {
     order.markAsPaid();
     assertEquals(OrderStatus.PAID, order.getStatus());
 
-    order.confirm();
+    order.markAsConfirmed();
 
     assertEquals(OrderStatus.CONFIRMED, order.getStatus());
   }
@@ -141,7 +141,7 @@ public class OrderTest {
   @Test
   void shouldThrowWhenAddItemOutsideDraftStatus() {
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.CAD);
-    order.cancel();
+    order.markAsCancelled();
 
     Money price = Money.of(50.0, Currency.BRL);
     assertThrows(InvalidOrderException.class,
@@ -153,13 +153,13 @@ public class OrderTest {
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.CAD);
 
     assertThrows(InvalidOrderException.class,
-        () -> order.confirm());
+        () -> order.markAsConfirmed());
   }
 
   @Test
   void shouldThrowWhenPaidOutsideDraftStatus() {
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.CAD);
-    order.cancel();
+    order.markAsCancelled();
 
     assertThrows(InvalidOrderException.class,
         () -> order.markAsPaid());
@@ -168,7 +168,7 @@ public class OrderTest {
   @Test
   void shouldThrowWhenChangeAddressOutsideDraftStatus() {
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.BRL);
-    order.cancel();
+    order.markAsCancelled();
 
     assertThrows(InvalidOrderException.class,
         () -> order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL)));
@@ -214,7 +214,7 @@ public class OrderTest {
 
     order.changeDeliveryAddress(this.address, Money.of(5.0, Currency.BRL));
 
-    order.cancel();
+    order.markAsCancelled();
 
     assertEquals(OrderStatus.CANCELLED, order.getStatus());
   }

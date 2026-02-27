@@ -7,8 +7,8 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import br.com.delivery.application.dto.order.AddItemToCartInput;
-import br.com.delivery.application.dto.order.AddItemToCartOutput;
+import br.com.delivery.application.dto.order.AddItemToOrderInput;
+import br.com.delivery.application.dto.order.AddItemToOrderOutput;
 import br.com.delivery.application.exceptions.AccountNotFoundException;
 import br.com.delivery.application.exceptions.MenuItemNotFoundException;
 import br.com.delivery.application.exceptions.RestaurantNotFoundException;
@@ -32,18 +32,18 @@ import br.com.delivery.domain.shared.Address;
 import br.com.delivery.domain.shared.ZipCode;
 import br.com.delivery.domain.restaurant.OpeningHours;
 
-class AddItemToCartUseCaseTest {
+class AddItemToOrderUseCaseTest {
   private FakeAccountRepository accountRepo;
   private FakeRestaurantRepository restaurantRepo;
   private FakeOrderRepository orderRepo;
-  private AddItemToCartUseCase useCase;
+  private AddItemToOrderUseCase useCase;
 
   @BeforeEach
   void setup() {
     accountRepo = new FakeAccountRepository();
     restaurantRepo = new FakeRestaurantRepository();
     orderRepo = new FakeOrderRepository();
-    useCase = new AddItemToCartUseCase(accountRepo, restaurantRepo, orderRepo);
+    useCase = new AddItemToOrderUseCase(accountRepo, restaurantRepo, orderRepo);
   }
 
   @Test
@@ -59,9 +59,9 @@ class AddItemToCartUseCaseTest {
     orderRepo.save(existing);
 
     MenuItem menuItem = restaurant.getMenu().get(0);
-    AddItemToCartInput input = new AddItemToCartInput(account.getId(), restaurant.getId(), menuItem.getId(), 3);
+    AddItemToOrderInput input = new AddItemToOrderInput(account.getId(), restaurant.getId(), menuItem.getId(), 3);
 
-    AddItemToCartOutput output = useCase.execute(input);
+    AddItemToOrderOutput output = useCase.execute(input);
 
     assertEquals(existing.getId(), output.orderId());
     Order saved = orderRepo.findById(output.orderId()).orElseThrow();
@@ -78,8 +78,8 @@ class AddItemToCartUseCaseTest {
     restaurantRepo.save(restaurant);
 
     MenuItem menuItem = restaurant.getMenu().get(0);
-    AddItemToCartOutput output = useCase.execute(
-        new AddItemToCartInput(account.getId(), restaurant.getId(), menuItem.getId(), 1));
+    AddItemToOrderOutput output = useCase.execute(
+        new AddItemToOrderInput(account.getId(), restaurant.getId(), menuItem.getId(), 1));
 
     assertNotNull(output.orderId());
     Order saved = orderRepo.findById(output.orderId()).orElseThrow();
@@ -94,7 +94,7 @@ class AddItemToCartUseCaseTest {
     restaurantRepo.save(restaurant);
 
     MenuItem menuItem = restaurant.getMenu().get(0);
-    AddItemToCartInput input = new AddItemToCartInput(AccountId.generate(), restaurant.getId(), menuItem.getId(), 1);
+    AddItemToOrderInput input = new AddItemToOrderInput(AccountId.generate(), restaurant.getId(), menuItem.getId(), 1);
 
     assertThrows(AccountNotFoundException.class, () -> useCase.execute(input));
   }
@@ -104,7 +104,8 @@ class AddItemToCartUseCaseTest {
     Account account = makeClient();
     accountRepo.save(account);
 
-    AddItemToCartInput input = new AddItemToCartInput(account.getId(), RestaurantId.generate(), MenuItemId.generate(), 1);
+    AddItemToOrderInput input = new AddItemToOrderInput(account.getId(), RestaurantId.generate(), MenuItemId.generate(),
+        1);
 
     assertThrows(RestaurantNotFoundException.class, () -> useCase.execute(input));
   }
@@ -117,7 +118,7 @@ class AddItemToCartUseCaseTest {
     Restaurant restaurant = makeRestaurantWithSingleItem(Currency.BRL);
     restaurantRepo.save(restaurant);
 
-    AddItemToCartInput input = new AddItemToCartInput(account.getId(), restaurant.getId(), MenuItemId.generate(), 1);
+    AddItemToOrderInput input = new AddItemToOrderInput(account.getId(), restaurant.getId(), MenuItemId.generate(), 1);
 
     assertThrows(MenuItemNotFoundException.class, () -> useCase.execute(input));
   }
@@ -132,7 +133,7 @@ class AddItemToCartUseCaseTest {
     item.deactivate();
     restaurantRepo.save(restaurant);
 
-    AddItemToCartInput input = new AddItemToCartInput(account.getId(), restaurant.getId(), item.getId(), 1);
+    AddItemToOrderInput input = new AddItemToOrderInput(account.getId(), restaurant.getId(), item.getId(), 1);
 
     assertThrows(InactiveItemException.class, () -> useCase.execute(input));
   }
@@ -146,7 +147,8 @@ class AddItemToCartUseCaseTest {
     Restaurant restaurant = makeRestaurantWithSingleItem(Currency.BRL);
     restaurantRepo.save(restaurant);
 
-    AddItemToCartInput input = new AddItemToCartInput(account.getId(), restaurant.getId(), restaurant.getMenu().get(0).getId(), 1);
+    AddItemToOrderInput input = new AddItemToOrderInput(account.getId(), restaurant.getId(),
+        restaurant.getMenu().get(0).getId(), 1);
 
     assertThrows(InactiveAccountException.class, () -> useCase.execute(input));
   }
@@ -154,7 +156,7 @@ class AddItemToCartUseCaseTest {
   @Test
   void inputShouldValidateQuantity() {
     assertThrows(InvalidOrderItemQuantityException.class,
-        () -> new AddItemToCartInput(AccountId.generate(), RestaurantId.generate(), MenuItemId.generate(), 0));
+        () -> new AddItemToOrderInput(AccountId.generate(), RestaurantId.generate(), MenuItemId.generate(), 0));
   }
 
   // helpers
@@ -163,7 +165,8 @@ class AddItemToCartUseCaseTest {
   }
 
   private Restaurant makeRestaurantWithSingleItem(Currency currency) {
-    Restaurant restaurant = Restaurant.create(AccountId.generate(), "r", new OpeningHours(java.time.LocalTime.of(0, 0), java.time.LocalTime.of(23, 59)),
+    Restaurant restaurant = Restaurant.create(AccountId.generate(), "r",
+        new OpeningHours(java.time.LocalTime.of(0, 0), java.time.LocalTime.of(23, 59)),
         new Address("s", "1", "", "c", "p", new ZipCode("00000-000")));
     restaurant.changeCurrency(currency);
     restaurant.addMenuItem("item", "desc", MenuItemCategory.DESSERT, Money.of(10, currency));

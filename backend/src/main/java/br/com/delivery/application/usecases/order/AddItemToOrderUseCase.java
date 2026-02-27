@@ -2,8 +2,8 @@ package br.com.delivery.application.usecases.order;
 
 import java.util.Objects;
 
-import br.com.delivery.application.dto.order.AddItemToCartInput;
-import br.com.delivery.application.dto.order.AddItemToCartOutput;
+import br.com.delivery.application.dto.order.AddItemToOrderInput;
+import br.com.delivery.application.dto.order.AddItemToOrderOutput;
 import br.com.delivery.application.exceptions.AccountNotFoundException;
 import br.com.delivery.application.exceptions.MenuItemNotFoundException;
 import br.com.delivery.application.exceptions.RestaurantNotFoundException;
@@ -18,18 +18,19 @@ import br.com.delivery.domain.restaurant.MenuItemId;
 import br.com.delivery.domain.restaurant.Restaurant;
 import br.com.delivery.domain.restaurant.RestaurantId;
 
-public final class AddItemToCartUseCase {
-  private IAccountRepository accountRepository;
-  private IRestaurantRepository restaurantRepository;
-  private IOrderRepository orderRepository;
+public final class AddItemToOrderUseCase {
+  private final IAccountRepository accountRepository;
+  private final IRestaurantRepository restaurantRepository;
+  private final IOrderRepository orderRepository;
 
-  public AddItemToCartUseCase(IAccountRepository accountRepository, IRestaurantRepository restaurantRepository, IOrderRepository orderRepository) {
+  public AddItemToOrderUseCase(IAccountRepository accountRepository, IRestaurantRepository restaurantRepository,
+      IOrderRepository orderRepository) {
     this.accountRepository = Objects.requireNonNull(accountRepository);
     this.restaurantRepository = Objects.requireNonNull(restaurantRepository);
     this.orderRepository = Objects.requireNonNull(orderRepository);
   }
 
-  public AddItemToCartOutput execute(AddItemToCartInput input) {
+  public AddItemToOrderOutput execute(AddItemToOrderInput input) {
     AccountId accountId = input.accountId();
     RestaurantId restaurantId = input.restaurantId();
     MenuItemId menuItemId = input.menuItemId();
@@ -50,8 +51,8 @@ public final class AddItemToCartUseCase {
     item.assertActive();
 
     order.addItem(menuItemId, item.getName(), item.getDescription(), item.getCategory(), item.currentPrice(), quantity);
-    
+
     orderRepository.save(order);
-    return new AddItemToCartOutput(order.getId());
+    return new AddItemToOrderOutput(order.getId());
   }
 }
