@@ -16,7 +16,6 @@ import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
 import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.exception.InvalidOrderException;
 import br.com.delivery.domain.exception.InvalidOrderItemException;
-import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
 import br.com.delivery.domain.restaurant.MenuItemCategory;
 import br.com.delivery.domain.restaurant.MenuItemId;
 import br.com.delivery.domain.restaurant.RestaurantId;
@@ -117,6 +116,39 @@ public class RemoveItemFromOrderUseCaseTest {
 
     assertThrows(InvalidOrderException.class,
         () -> useCase.execute(input));
+  }
+
+  @Test
+  void shouldReturnCorrectOutputDataWhenRemovingPartialQuantity() {
+    MenuItemId menuItemId = MenuItemId.generate();
+    Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.BRL);
+    order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
+    this.orderRepo.save(order);
+
+    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 3);
+    RemoveItemFromOrderOutput output = useCase.execute(input);
+
+    assertEquals(order.getId(), output.orderId());
+    assertEquals(Money.of(20, Currency.BRL), output.newTotal());
+    assertEquals(1, output.remainingItems().size());
+    assertEquals(menuItemId, output.remainingItems().get(0).menuItemId());
+    assertEquals(2, output.remainingItems().get(0).quantity());
+    assertEquals(Money.of(10, Currency.BRL), output.remainingItems().get(0).unitPrice());
+  }
+
+  @Test
+  void shouldReturnCorrectOutputDataWhenRemovingTotalQuantity() {
+    MenuItemId menuItemId = MenuItemId.generate();
+    Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.BRL);
+    order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
+    this.orderRepo.save(order);
+
+    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 5);
+    RemoveItemFromOrderOutput output = useCase.execute(input);
+
+    assertEquals(order.getId(), output.orderId());
+    assertEquals(Money.of(0.0, Currency.BRL), output.newTotal());
+    assertTrue(output.remainingItems().isEmpty());
   }
 
   private static class FakeOrderRepository implements br.com.delivery.domain.repositories.IOrderRepository {

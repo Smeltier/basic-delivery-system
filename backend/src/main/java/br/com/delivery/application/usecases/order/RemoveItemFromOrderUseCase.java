@@ -1,7 +1,9 @@
 package br.com.delivery.application.usecases.order;
 
 import java.util.Objects;
+import java.util.List;
 
+import br.com.delivery.application.dto.order.OrderItemOutput;
 import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
 import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
 import br.com.delivery.application.exceptions.OrderNotFoundException;
@@ -28,8 +30,12 @@ public class RemoveItemFromOrderUseCase {
         .orElseThrow(() -> new OrderNotFoundException("Pedido não encontrado."));
 
     order.decreaseItem(menuItemId, quantity);
-
     orderRepository.save(order);
-    return new RemoveItemFromOrderOutput();
+
+    List<OrderItemOutput> items = order.getItems().stream()
+        .map(item -> new OrderItemOutput(item.getMenuItemId(), item.getQuantity(), item.getUnitPrice()))
+        .toList();
+
+    return new RemoveItemFromOrderOutput(orderId, order.total(), items);
   }
 }
