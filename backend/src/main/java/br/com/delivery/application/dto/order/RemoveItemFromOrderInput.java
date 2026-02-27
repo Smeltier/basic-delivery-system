@@ -6,8 +6,8 @@ import br.com.delivery.domain.exception.InvalidOrderItemQuantityException;
 import br.com.delivery.domain.order.OrderId;
 import br.com.delivery.domain.restaurant.MenuItemId;
 
-public record RemoveItemToOrderInput(OrderId orderId, MenuItemId menuItemId, int quantity) { 
-  public RemoveItemToOrderInput {
+public record RemoveItemFromOrderInput(OrderId orderId, MenuItemId menuItemId, int quantity) { 
+  public RemoveItemFromOrderInput {
     orderId = Objects.requireNonNull(orderId);
     menuItemId = Objects.requireNonNull(menuItemId);
 
