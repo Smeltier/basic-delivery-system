@@ -50,7 +50,7 @@ public class AccountIdTest {
   @Test
   void shouldThrowWhenModifyingInactiveAccount() {
     Account account = Account.create("Teste", new Email("teste@email.com"), Set.of(AccountRole.BASE_CLIENT));
-    account.deactivate();
+    account.deactivateAccount();
     
     assertThrows(InactiveAccountException.class, () -> account.changeName("Novo Nome"));
     assertThrows(InactiveAccountException.class, () -> account.changeEmail(new Email("novo@email.com")));
@@ -61,10 +61,10 @@ public class AccountIdTest {
   void shouldActivateAndDeactivate() {
     Account account = Account.create("Teste", new Email("teste@email.com"), Set.of(AccountRole.BASE_CLIENT));
     
-    account.deactivate();
+    account.deactivateAccount();
     assertFalse(account.isActive());
     
-    account.activate();
+    account.activateAccount();
     assertTrue(account.isActive());
   }
 
