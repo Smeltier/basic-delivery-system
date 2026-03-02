@@ -54,7 +54,6 @@ class AddItemToOrderUseCaseTest {
     Restaurant restaurant = makeRestaurantWithSingleItem(Currency.BRL);
     restaurantRepo.save(restaurant);
 
-    // existing draft order
     Order existing = Order.create(restaurant.getId(), account.getId(), restaurant.getCurrency());
     orderRepo.save(existing);
 
@@ -141,7 +140,7 @@ class AddItemToOrderUseCaseTest {
   @Test
   void shouldPropagateInactiveAccountException() {
     Account account = makeClient();
-    account.deactivate();
+    account.deactivateAccount();
     accountRepo.save(account);
 
     Restaurant restaurant = makeRestaurantWithSingleItem(Currency.BRL);
@@ -159,7 +158,6 @@ class AddItemToOrderUseCaseTest {
         () -> new AddItemToOrderInput(AccountId.generate(), RestaurantId.generate(), MenuItemId.generate(), 0));
   }
 
-  // helpers
   private Account makeClient() {
     return Account.create("X", new Email("x@d.com"), Set.of(AccountRole.BASE_CLIENT));
   }

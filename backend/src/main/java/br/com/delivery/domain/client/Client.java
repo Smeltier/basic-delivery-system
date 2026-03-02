@@ -41,7 +41,7 @@ public final class Client {
     return Optional.ofNullable(this.cpf);
   }
 
-  public void setCpf(final Cpf newCpf) {
+  public void setCpf(Cpf newCpf) {
     this.cpf = Objects.requireNonNull(newCpf);
   }
 
