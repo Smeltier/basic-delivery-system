@@ -61,11 +61,11 @@ public final class Account {
     return this.active;
   }
 
-  public void deactivate() {
+  public void deactivateAccount() {
     this.active = false;
   }
 
-  public void activate() {
+  public void activateAccount() {
     this.active = true;
   }
 
