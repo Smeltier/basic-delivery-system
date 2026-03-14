@@ -26,8 +26,8 @@ public class Order {
   private final AccountId accountId;
   private final Currency currency;
   private final List<OrderItem> items;
-  private final LocalDateTime createdAt;
   private final List<PaymentId> payments;
+  private final LocalDateTime createdAt;
   private LocalDateTime confirmedAt;
   private LocalDateTime cancelledAt;
   private LocalDateTime deliveredAt;
@@ -257,5 +257,4 @@ public class Order {
   public Optional<LocalDateTime> getPaidAt() {
     return Optional.ofNullable(paidAt);
   }
-
 }
