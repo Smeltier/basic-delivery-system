@@ -6,206 +6,389 @@ skinparam classArrowColor black
 skinparam nodesep 80
 skinparam ranksep 80
 
-skinparam ClassDiagram {
-    ArrowThickness 1
-    ArrowColor black
-    HorizontalSpacing 60
-    VerticalSpacing 60
-    ArrowFontSize 11
-    ArrowFontColor black
-    ArrowFontStyle plain
+' skinparam ClassDiagram {
+'     ArrowThickness 1
+'     ArrowColor black
+'     HorizontalSpacing 60
+'     VerticalSpacing 60
+'     ArrowFontSize 11
+'     ArrowFontColor black
+'     ArrowFontStyle plain
+' }
+
+namespace domain {
+
+    namespace order {
+
+        class Order {
+            - LocalDateTime paidAt
+            - LocalDateTime createdAt
+            - LocalDateTime confirmedAt
+            - LocalDateTime cancelledAt
+            - LocalDateTime deliveredAt
+
+            - Order(OrderId id, RestaurantId restaurantId, AccountId accountId, Currency currency, LocalDateTime createdAt)
+            + {static} Order create(RestaurantId restaurantId, AccountId accountId, Currency currencyy)
+            + {static} Order restore(OrderId id, RestaurantId restaurantId, AccountId accountId, Currency currency, LocalDateTime createdAt, OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address, Money deliveryFee, LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt, LocalDateTime deliveredAt)
+            + void addItem(MenuItemId menuItemId, String menuItemName, String description, MenuItemCategory category, Money unitPrice, int quantity)
+            + void decreaseItem(MenuItemId menuItemId, int quantity)
+            + void changeDeliveryAddress(Address newAddress, Money newFee)
+            + void registerPayment(PaymentId paymentId)
+            + Money total()
+            + void markAsPaid()
+            + void markAsDelivered()
+            + void markAsConfirmed()
+            + void markASCancelled()
+            + OrderId getId()
+            + RestaurantId getRestaurantId()
+            + AccountId getAccountId()
+            + OrderStatus getStatus()
+            + Currency getCurrency()
+            + Money getDeliveryFee()
+            + Address getDeliveryAddress()
+            + List<PaymentId> getPayments()
+            + List<OrderItem> getItems()
+            + LocalDateTime getCreatedAt()
+            + Optional<LocalDateTime> getCancelledAt()
+            + Optional<LocalDateTime> getConfirmedAt()
+            + Optional<LocalDateTime> getDeliveredAt()
+            + Optional<LocalDateTime> getPaidAt()
+        }
+
+        class OrderId <<Value Object>> {
+            - UUID value
+
+            + OrderId(UUID value)
+            + {static} OrderId generate()
+            + UUID getValue()
+        }
+
+        class OrderItem <<Immutable>> {
+            - String menuItemName
+            - String menuItemDescription
+            - int quantity
+
+            + OrderItem(MenuItemId menuItemId, String menuItemName, String menuItemDescription, MenuItemCategory category, Money unitPrice, int quantity)
+            + Money total()
+            + MenuItemId getMenuItemId()
+            + String getProductName()
+            + String getMenuItemDescription()
+            + MenuItemCategory getMenuItemCategory()
+            + Money getUnitPrice()
+            + int getQuantity()
+        }
+
+        enum OrderStatus {
+            DRAFT,
+            PAID,
+            CONFIRMED,
+            DELIVERED,
+            CANCELLED
+        }
+    }
+
+    namespace account {
+
+        class Account {
+        }
+
+        class AccountId <<Value Object>> {
+        }
+    }
+
+    namespace client {
+
+        class Client {
+        }
+
+        class ClientId <<Value Object>> {
+        }
+    }
+
+    namespace exception {
+
+        exception InvalidOrderException {
+        }
+
+        exception CurrencyMismatchException {
+        }
+
+        exception InvalidOrderItemQuantityException {
+        }
+
+        exception InvalidOrderItemException {
+        }
+
+        exception InactiveAccountException {
+        }
+
+        exception InactiveItemException {
+        }
+
+        exception InsufficientFundsException {
+        }
+
+        exception InvalidAddressException {
+        }
+
+        exception InvalidClientException {
+        }
+
+        exception InvalidCpfValueException {
+        }
+
+        exception InvalidMoneyException {
+        }
+
+        exception InvalidPaymentException {
+        }
+
+        exception InvalidRestaurantException {
+        }
+
+        exception InvalidRestaurantOwnerException {
+        }
+    }
+
+    namespace payment {
+
+        interface IPaymentMethod {
+            + PaymentProcessingResult process(Payment payment)
+        }
+
+        class Payment {
+            - Payment(PaymentId id, OrderId orderId, IPaymentMethod paymentMethod, Money amount)
+            + {static} Payment create(OrderId orderId, IPaymentMethod paymentMethod, Money amount)
+            + void process()
+            + void cancel()
+            + void refund()
+            + boolean isApproved()
+            + PaymentId getId()
+            + OrderId getOrderId()
+            + Money getAmount()
+            + PaymentStatus getStatus()
+            - changeStatus(PaymentStatus newStatus)
+        }
+
+        class PaymentId <<Value Object>> {
+            - UUID value
+
+            + PaymentId(UUID value)
+            + {static} PaymentId generate()
+            + UUID getValue()
+        }
+
+        enum PaymentProcessingResult {
+            APPROVED,
+            REJECTED,
+            PENDING
+        }
+
+        enum PaymentStatus {
+            PENDING,
+            APPROVED,
+            DECLINED,
+            CANCELLED,
+            REFUNDED
+        }
+    }
+
+    namespace repositories {
+
+        interface IAccountRepository {
+            + Optional<Account> findById(AccountId id)
+            + void save(Account account)
+        }
+
+        interface IClientRepository {
+            + Optional<Account> findById(AccountId id)
+            + boolean existsById(AccountId id)
+            + void save(Account account)
+        }
+
+        interface IOrderRepository {
+            + Optional<Order> findById(OrderId id)
+            + Optional<Order> findDraftByClientAndRestaurant(AccountId accountId, RestaurantId restaurantId)
+            + void save(Order order)
+        }
+
+        interface IRestaurantOwnerRepository {
+            + Optional<RestaurantOwner> findById(AccountId id)
+            + boolean existsById(AccountId id)
+            + void save(RestaurantOwner restaurantOwner)
+        }
+
+        interface IRestaurantRepository {
+            + Optional<Restaurant> findById(RestaurantId id)
+            + List<Restaurant> findAllByOwnerId(AccountId ownerId)
+            + boolean existsById(RestaurantId id)
+            + void save(Restaurant restaurant)
+        }
+    }
+
+    namespace restaurant {
+
+        class MenuItem {
+            - String name
+            - String description
+            - boolean active
+
+            + MenuItem(MenuItemId id, RestaurantId restaurantId, String name, String description, MenuItemCategory category, Money price)
+            + Money currentPrice()
+            + void changePrice(Money newPrice)
+            + void changeName(String newName)
+            + void changeDescription(String newDescription)
+            + void changeCategory(MenuItemCategory newCategory)
+            + void activate()
+            + void deactivate()
+            + boolean isActive()
+            + MenuItemId getId()
+            + RestaurantId getRestaurantId()
+            + String getName()
+            + String getDescription()
+            + MenuItemCategory getCategory()
+            + void assertActive()
+        }
+
+        class MenuItemId <<Value Object>> {
+        }
+
+        enum MenuItemCategory {
+        }
+
+        class OpeningHours <<Value Object>> {
+        }
+
+        class Restaurant {
+        }
+
+        class RestaurantId <<Value Object>> {
+        }
+
+        class RestaurantStatus {
+        }
+    }
+
+    namespace restaurantowner {
+
+        class RestaurantOwner {
+            - String corporateName
+
+            - RestaurantOwner(AccountId id)
+            + {static} RestaurantOwner create(AccountId id)
+            + {static} RestaurantOwner restore(AccountId id, Cnpj cnpj, String corporateName)
+            + void updateCnpj(Cnpj newCpnj)
+            + void updateCoporateName(String newCorporateName)
+            + AccountId getId()
+            + Cnpj getCnpj()
+            + String getCorporateName()
+        }
+    }
+
+    namespace Shared {
+
+        class Address <<Value Object>> {
+            - String street
+            - String number
+            - String complement
+            - String city
+            - String country
+            - ZipCode zipCode
+
+            + Address(String street, String number, String complement, String city, String country, ZipCode zipCode)
+            + String getStreet()
+            + String getNumber()
+            + String getComplement()
+            + String getCity()
+            + String getCountry()
+            + ZipCode getZipCode()
+        }
+
+        class Cpf <<Value Object>> {
+            - {static} Pattern CPF_PATTERN
+            - String value
+
+            + Cpf(String value)
+            - boolean isSequence(String cpf)
+            - boolean isValidCpf(String cpf)
+            - int calculateDigit(String str, int weight)
+        }
+
+        class Cnpj <<Value Object>> {
+        }
+
+        enum Currency {
+            BRL,
+            CAD,
+            USD
+        }
+
+        class Email <<Value Object>> {
+            - {static} Pattern EMAIL_PATTERN
+            - String value
+
+            + Email(String value)
+            + String getValue()
+        }
+
+        class Money <<Value Object>> {
+            - BigDecimal amount
+            - Currency currency
+
+            - Money(BigDecimal amount, Currency currency)
+            + {static} Money of(double amount, Currency currency)
+            + {static} Money of(BigDecimal amount, Currency currency)
+            + {static} Money zero(Currency currency)
+            + Money add(Money value)
+            + Money subtract(Money value)
+            + Money multiply(int factor)
+            + boolean isPositive()
+            + boolean isZero()
+            - void ensureSameCurrency(Money value)
+        }
+
+        class ZipCode <<Value Object>> {
+            - {static} Pattern ZIP_PATTERN
+            - String value
+
+            + ZipCode(String value)
+            + String getValue()
+            + String toString()
+            - String normalize(String value)
+        }
+    }
 }
 
-namespace Domain {
-    class Order {
-        - LocalDateTime paidAt
-        - LocalDateTime createdAt
-        - LocalDateTime confirmedAt
-        - LocalDateTime cancelledAt
-        - LocalDateTime deliveredAt
+namespace Application {
 
-        - Order(OrderId id, ClientId clientId, Currency currency, LocalDateTime createdAt)
-        + {static} Order create(ClientId clientId, Currency currency)
-        + {static} Order restore(OrderId id, ClientId clientId, Currency currency LocalDateTime createdAt, OrderStatus status, List<OrderItem> items, List<PaymentId> payments, Address address, Money deliveryFee, LocalDateTime paidAt, LocalDateTime confirmedAt, LocalDateTime cancelledAt, LocalDateTime deliveredAt)
-        + void addItem(ProductId productId, String productName, Money unitPrice, int quantity)
-        + void removeItem(ProductId productId)
-        + void changeDeliveryAddress(Address newAddress, Money newFee)
-        + void registerPayment(PaymentId paymentId)
-        + Money total()
-        + void markAsPaid()
-        + void markAsDelivered()
-        + void confirm()
-        + void cancel()
-        + OrderId getId()
-        + ClientId getClientId()
-        + OrderStatus getStatus()
-        + Currency getCurrency()
-        + Money getDeliveryFee()
-        + Address getDeliveryAddress()
-        + List<PaymentId> getPayments()
-        + List<OrderItem> getItems()
-    }
+}
 
-    class OrderId <<Value Object>> {
-        - UUID value
-
-        + OrderId(UUID value)
-        + {static} OrderId generate()
-        + UUID getValue()
-    }
-
-    class OrderItem <<Immutable>> {
-        - ProductId productId
-        - String productName
-        - Money unitPrice
-        - int quantity
-
-        + OrderItem(ProductId productId, String productName, Money unitPrice, int quantity)
-        + Money total()
-        + ProductId getProductId()
-        + String getProductName()
-        + Money getUnitPrice()
-        + int getQuantity()
-    }
-
-    enum OrderStatus {
-        CREATED,
-        PAID,
-        CONFIRMED,
-        DELIVERED,
-        CANCELLED
-    }
-
-    exception InvalidOrderOperationException {
-    }
-
-    class Address <<Immutable>> {
-        - String street
-        - String number
-        - String complement
-        - String city
-        - String country
-        - ZipCode zipCode
-
-        + Address(String street, String number, String complement, String city, String country, ZipCode zipCode)
-        + String getStreet()
-        + String getNumber()
-        + String getComplement()
-        + String getCity()
-        + String getCountry()
-        + ZipCode getZipCode()
-    }
-
-    class Cpf <<Immutable>> {
-        - {static} Pattern CPF_PATTERN
-        - String value
-
-        + Cpf(String value)
-        - boolean isSequence(String cpf)
-        - boolean isValidCpf(String cpf)
-        - int calculateDigit(String str, int weight)
-    }
-
-    enum Currency {
-        BRL,
-        CAD,
-        USD
-    }
-
-    exception CurrencyMismatchException {
-    }
-
-    class Email <<Immutable>> {
-        - {static} Pattern EMAIL_PATTERN
-        - String value
-
-        + Email(String value)
-        + String getValue()
-    }
-
-    class Money <<Immutable>> {
-        - BigDecimal amount
-        - Currency currency
-
-        - Money(BigDecimal amount, Currency currency)
-        + {static} Money of(double amount, Currency currency)
-        + {static} Money of(BigDecimal amount, Currency currency)
-        + {static} Money zero(Currency currency)
-        + Money add(Money value)
-        + Money subtract(Money value)
-        + Money multiply(int factor)
-        + boolean isPositive()
-        + boolean isZero()
-        - void ensureSameCurrency(Money value)
-    }
-
-    class ZipCode <<Immutable>> {
-        - {static} Pattern ZIP_PATTERN
-        - String value
-
-        + ZipCode(String value)
-        + String getValue()
-        + String toString()
-        - String normalize(String value)
-    }
-
-    class Client {
-    }
-
-    class ClientId <<Immutable>> {
-    }
-
-    interface IPaymentMethod {
-        + PaymentProcessingResult process(Payment payment)
-    }
-
-    class Payment {
-        - Payment(PaymentId id, OrderId orderId, IPaymentMethod paymentMethod, Money amount)
-        + {static} Payment create(OrderId orderId, IPaymentMethod paymentMethod, Money amount)
-        + void process()
-        + void cancel()
-        + void refund()
-        + boolean isApproved()
-        + PaymentId getId()
-        + OrderId getOrderId()
-        + Money getAmount()
-        + PaymentStatus getStatus()
-        - changeStatus(PaymentStatus newStatus)
-    }
-
-    class PaymentId <<Immutable>> {
-        - UUID value
-
-        + PaymentId(UUID value)
-        + {static} PaymentId generate()
-        + UUID getValue()
-    }
-
-    enum PaymentProcessingResult {
-        APPROVED,
-        REJECTED,
-        PENDING
-    }
-
-    enum PaymentStatus {
-        PENDING,
-        APPROVED,
-        DECLINED,
-        CANCELLED,
-        REFUNDED
-    }
+namespace Infrastructure {
 }
 
 Order *--> "1 id" OrderId
 Order *--> "1 status" OrderStatus
 Order *--> "0..* items" OrderItem
 Order *--> "0..* payments" PaymentId 
+Order o--> "1 restaurantId" RestaurantId
+Order o--> "1 accountId" AccountId
 Order o--> "1 deliveryAddress" Address
 Order o--> "1 deliveryFee" Money
-Order o--> "1 clientId" ClientId
 Order o--> "1 currency" Currency
-Order ...> InvalidOrderOperationException: Throws
+Order ...> InvalidOrderException: Throws
 Order ...> CurrencyMismatchException: Throws
+
+OrderItem o--> "1 menuItemId" MenuItemId
+OrderItem o--> "1 MenuItemCategory" MenuItemCategory
+OrderItem o--> "1 unitPrice" Money
+OrderItem ...> InvalidOrderItemException: Throws
+OrderItem ...> InvalidOrderItemQuantityException: Throws
+
+MenuItem *--> "1 id" MenuItemId
+MenuItem o--> "1 restaurantId" RestaurantId
+MenuItem o--> "1 category" MenuItemCategory
+MenuItem o--> "1 unitPrice" Money
+MenuItem ...> InactiveItemException: Throws
 
 Payment *--> "1 id" PaymentId
 Payment o--> "1 paymentMethod" IPaymentMethod
@@ -213,8 +396,16 @@ Payment o--> "1 amount" Money
 Payment o--> "1 orderId" OrderId
 Payment o--> "1 status" PaymentStatus
 
+RestaurantOwner o--> "1 id" AccountId
+RestaurantOwner o--> "1 cnpj" Cnpj
+
 IPaymentMethod --> PaymentProcessingResult: Returns
 
 Currency ...> CurrencyMismatchException: Throws
+
+Money ...> CurrencyMismatchException: Throws
+Money ...> InvalidMoneyException: Throws
+
+Address ...> InvalidAddressException: Throws
 
 @enduml
