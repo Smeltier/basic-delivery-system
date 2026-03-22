@@ -51,7 +51,7 @@ public class OrderController {
 
         AddItemToOrderOutput output = addItemToOrderUseCase.execute(input);
 
-        return new AddItemToOrderResponse(output.orderId().toString());
+        return new AddItemToOrderResponse(output.orderId().value().toString());
     }
 
     @DeleteMapping("/{orderId}/items/{menuItemId}")
@@ -70,14 +70,14 @@ public class OrderController {
 
         List<OrderItemResponse> remainingItems = output.remainingItems().stream()
             .map(item -> new OrderItemResponse(
-                item.menuItemId().toString(),
+                item.menuItemId().value().toString(),
                 item.quantity(),
                 item.unitPrice().amount()
             ))
             .toList();
 
         return new RemoveItemFromOrderResponse(
-            output.orderId().toString(),
+            output.orderId().value().toString(),
             output.newTotal().amount(),
             remainingItems
         );
