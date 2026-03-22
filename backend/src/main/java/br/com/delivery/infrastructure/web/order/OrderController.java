@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,7 +58,7 @@ public class OrderController {
     public RemoveItemFromOrderResponse removeItem(
         @PathVariable String orderId,
         @PathVariable String menuItemId,
-        @PathVariable int quantity
+        @RequestParam int quantity
     ) {
         RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(
             new OrderId(UUID.fromString(orderId)),
@@ -67,7 +68,7 @@ public class OrderController {
 
         RemoveItemFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
 
-        List<OrderItemResponse> items = output.remainingItems().stream()
+        List<OrderItemResponse> remainingItems = output.remainingItems().stream()
             .map(item -> new OrderItemResponse(
                 item.menuItemId().toString(),
                 item.quantity(),
@@ -78,7 +79,7 @@ public class OrderController {
         return new RemoveItemFromOrderResponse(
             output.orderId().toString(),
             output.newTotal().amount(),
-            items
+            remainingItems
         );
     }
 }
