@@ -1,0 +1,84 @@
+package br.com.delivery.infrastructure.web.order;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.com.delivery.application.dto.order.AddItemToOrderInput;
+import br.com.delivery.application.dto.order.AddItemToOrderOutput;
+import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
+import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
+import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
+import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
+import br.com.delivery.domain.account.AccountId;
+import br.com.delivery.domain.order.OrderId;
+import br.com.delivery.domain.restaurant.MenuItemId;
+import br.com.delivery.domain.restaurant.RestaurantId;
+
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+    private final AddItemToOrderUseCase addItemToOrderUseCase;
+    private final RemoveItemFromOrderUseCase removeItemFromOrderUseCase;
+
+    public OrderController(
+        AddItemToOrderUseCase addItemToOrderUseCase,
+        RemoveItemFromOrderUseCase removeItemFromOrderUseCase
+    ) {
+        this.addItemToOrderUseCase = Objects.requireNonNull(addItemToOrderUseCase);
+        this.removeItemFromOrderUseCase = Objects.requireNonNull(removeItemFromOrderUseCase);
+    }
+
+    @PostMapping("/items")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AddItemToOrderResponse addItem(@RequestBody AddItemToOrderRequest request) {
+        AddItemToOrderInput input = new AddItemToOrderInput(
+            new AccountId(UUID.fromString(request.accountId())),
+            new RestaurantId(UUID.fromString(request.restaurantId())),
+            new MenuItemId(UUID.fromString(request.menuItemId())),
+            request.quantity()
+        );
+
+        AddItemToOrderOutput output = addItemToOrderUseCase.execute(input);
+
+        return new AddItemToOrderResponse(output.orderId().toString());
+    }
+
+    @DeleteMapping("/{orderId}/items/{menuItemId}")
+    public RemoveItemFromOrderResponse removeItem(
+        @PathVariable String orderId,
+        @PathVariable String menuItemId,
+        @PathVariable int quantity
+    ) {
+        RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(
+            new OrderId(UUID.fromString(orderId)),
+            new MenuItemId(UUID.fromString(menuItemId)),
+            quantity
+        );
+
+        RemoveItemFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
+
+        List<OrderItemResponse> items = output.remainingItems().stream()
+            .map(item -> new OrderItemResponse(
+                item.menuItemId().toString(),
+                item.quantity(),
+                item.unitPrice().amount()
+            ))
+            .toList();
+
+        return new RemoveItemFromOrderResponse(
+            output.orderId().toString(),
+            output.newTotal().amount(),
+            items
+        );
+    }
+}
