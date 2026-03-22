@@ -40,6 +40,7 @@ public final class Restaurant {
 
   public static Restaurant restore(RestaurantId id, AccountId ownerId, String name, OpeningHours openingHours, Address address, Currency currency, RestaurantStatus status, List<MenuItem> menuItems) {
     Restaurant restaurant = new Restaurant(id, ownerId, name, openingHours, address);
+    restaurant.currency = currency;
     restaurant.status = status;
     restaurant.menuItems.addAll(menuItems);
     return restaurant;
