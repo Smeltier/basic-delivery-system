@@ -129,7 +129,10 @@ public class RestaurantTest {
   void shouldThrowWhenOpenAOpenedRestaurant() {
     Restaurant restaurant = Restaurant.create(ownerId, "restaurant", hours, address);
     restaurant.addMenuItem("item", "description", MenuItemCategory.DESSERT, money);
-    restaurant.openRestaurant(LocalTime.now());
+
+    LocalTime fakeTime = LocalTime.of(10, 10);
+    restaurant.openRestaurant(fakeTime);
+
     assertThrows(InvalidRestaurantException.class,
         () -> restaurant.openRestaurant(LocalTime.now()));
   }
