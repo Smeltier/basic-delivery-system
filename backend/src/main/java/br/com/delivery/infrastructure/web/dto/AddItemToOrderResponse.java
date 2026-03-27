@@ -1,4 +1,4 @@
-package br.com.delivery.infrastructure.web.order;
+package br.com.delivery.infrastructure.web.dto;
 
 public record AddItemToOrderResponse(String orderId) {
 }

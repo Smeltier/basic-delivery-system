@@ -18,25 +18,35 @@ import br.com.delivery.application.dto.order.AddItemToOrderInput;
 import br.com.delivery.application.dto.order.AddItemToOrderOutput;
 import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
 import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
+import br.com.delivery.application.dto.order.CancelOrderInput;
 import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
 import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
+import br.com.delivery.application.usecases.order.CancelOrderUseCase;
 import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.order.OrderId;
 import br.com.delivery.domain.restaurant.MenuItemId;
 import br.com.delivery.domain.restaurant.RestaurantId;
+import br.com.delivery.infrastructure.web.dto.AddItemToOrderRequest;
+import br.com.delivery.infrastructure.web.dto.AddItemToOrderResponse;
+import br.com.delivery.infrastructure.web.dto.OrderItemResponse;
+import br.com.delivery.infrastructure.web.dto.RemoveItemFromOrderResponse;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
     private final AddItemToOrderUseCase addItemToOrderUseCase;
     private final RemoveItemFromOrderUseCase removeItemFromOrderUseCase;
+    private final CancelOrderUseCase cancelOrderUseCase;
 
     public OrderController(
         AddItemToOrderUseCase addItemToOrderUseCase,
-        RemoveItemFromOrderUseCase removeItemFromOrderUseCase
+        RemoveItemFromOrderUseCase removeItemFromOrderUseCase,
+        CancelOrderUseCase cancelOrderUseCase
+
     ) {
         this.addItemToOrderUseCase = Objects.requireNonNull(addItemToOrderUseCase);
         this.removeItemFromOrderUseCase = Objects.requireNonNull(removeItemFromOrderUseCase);
+        this.cancelOrderUseCase = Objects.requireNonNull(cancelOrderUseCase);
     }
 
     @PostMapping("/items")
@@ -81,5 +91,14 @@ public class OrderController {
             output.newTotal().amount(),
             remainingItems
         );
+    }
+
+    @DeleteMapping("/{orderId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelOrder(@PathVariable String orderId) {
+        CancelOrderInput input = new CancelOrderInput(
+            new OrderId(UUID.fromString(orderId))
+);
+        cancelOrderUseCase.execute(input);
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
+import br.com.delivery.application.usecases.order.CancelOrderUseCase;
 import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
 import br.com.delivery.domain.repositories.IAccountRepository;
 import br.com.delivery.domain.repositories.IClientRepository;
@@ -50,6 +51,11 @@ public class ApplicationConfig {
         IOrderRepository orderRepository
     ) {
         return new AddItemToOrderUseCase(accountRepository, restaurantRepository, orderRepository);
+    }
+
+    @Bean
+    public CancelOrderUseCase cancelOrderUseCase(IOrderRepository orderRepository) {
+        return new CancelOrderUseCase(orderRepository);
     }
 
     @Bean
