@@ -4,22 +4,22 @@ import java.util.Objects;
 import java.util.List;
 
 import br.com.delivery.application.dto.order.OrderItemOutput;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderInput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderOutput;
 import br.com.delivery.application.exceptions.OrderNotFoundException;
 import br.com.delivery.domain.order.Order;
 import br.com.delivery.domain.order.OrderId;
 import br.com.delivery.domain.repositories.IOrderRepository;
 import br.com.delivery.domain.restaurant.MenuItemId;
 
-public class RemoveItemFromOrderUseCase {
+public class DecreaseItemQuantityFromOrderUseCase {
   private final IOrderRepository orderRepository;
 
-  public RemoveItemFromOrderUseCase(IOrderRepository orderRepository) {
+  public DecreaseItemQuantityFromOrderUseCase(IOrderRepository orderRepository) {
     this.orderRepository = Objects.requireNonNull(orderRepository);
   }
 
-  public RemoveItemFromOrderOutput execute(RemoveItemFromOrderInput input) {
+  public DecreaseItemQuantityFromOrderOutput execute(DecreaseItemQuantityFromOrderInput input) {
     input = Objects.requireNonNull(input);
 
     OrderId orderId = input.orderId();
@@ -36,6 +36,6 @@ public class RemoveItemFromOrderUseCase {
         .map(item -> new OrderItemOutput(item.getMenuItemId(), item.getQuantity(), item.getUnitPrice()))
         .toList();
 
-    return new RemoveItemFromOrderOutput(orderId, order.total(), items);
+    return new DecreaseItemQuantityFromOrderOutput(orderId, order.total(), items);
   }
 }
