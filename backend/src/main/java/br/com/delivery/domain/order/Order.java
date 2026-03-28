@@ -98,9 +98,21 @@ public class Order {
     items.add(updatedItem);
   }
 
+  public void removeItem(MenuItemId menuItemId) {
+    if (status != OrderStatus.DRAFT) {
+      throw new InvalidOrderException("Não pode remover itens no status: " + status);
+    }
+
+    boolean removed = items.removeIf(item -> item.getMenuItemId().equals(menuItemId));
+
+    if (!removed) {
+      throw new InvalidOrderException("Item inexistente.");
+    }
+  }
+
   public void decreaseItem(MenuItemId menuItemId, int quantity) {
     if (status != OrderStatus.DRAFT) {
-      throw new InvalidOrderException("Não pode remover  itens no status: " + status);
+      throw new InvalidOrderException("Não pode remover itens no status: " + status);
     }
 
     if (quantity <= 0) {
@@ -127,7 +139,8 @@ public class Order {
           existingItem.getMenuItemDescription(),
           existingItem.getMenuItemCategory(),
           existingItem.getUnitPrice(),
-          newQuantity);
+          newQuantity
+      );
       items.add(updatedItem);
     }
   }
