@@ -10,9 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 
 import br.com.delivery.domain.order.Order;
 import br.com.delivery.domain.order.OrderId;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderOutput;
 import br.com.delivery.application.exceptions.OrderNotFoundException;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderInput;
 import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.exception.InvalidOrderException;
 import br.com.delivery.domain.exception.InvalidOrderItemException;
@@ -23,20 +23,20 @@ import br.com.delivery.domain.shared.Currency;
 import br.com.delivery.domain.shared.Money;
 import br.com.delivery.domain.order.OrderItem;
 
-public class RemoveItemFromOrderUseCaseTest {
+public class DecreaseItemQuantityFromOrderUseCaseTest {
   private FakeOrderRepository orderRepo;
-  private RemoveItemFromOrderUseCase useCase;
+  private DecreaseItemQuantityFromOrderUseCase useCase;
 
   @BeforeEach
   void setup() {
     this.orderRepo = new FakeOrderRepository();
-    this.useCase = new RemoveItemFromOrderUseCase(orderRepo);
+    this.useCase = new DecreaseItemQuantityFromOrderUseCase(orderRepo);
   }
 
   @Test
   void shouldThrowWhenIOrderRepositoryIsNull() {
     assertThrows(NullPointerException.class,
-        () -> new RemoveItemFromOrderUseCase(null));
+        () -> new DecreaseItemQuantityFromOrderUseCase(null));
   }
 
   @Test
@@ -53,8 +53,8 @@ public class RemoveItemFromOrderUseCaseTest {
     order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 5);
-    RemoveItemFromOrderOutput output = useCase.execute(input);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 5);
+    DecreaseItemQuantityFromOrderOutput output = useCase.execute(input);
 
     assertNotNull(output);
 
@@ -70,9 +70,9 @@ public class RemoveItemFromOrderUseCaseTest {
     order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 3);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 3);
 
-    RemoveItemFromOrderOutput output = useCase.execute(input);
+    DecreaseItemQuantityFromOrderOutput output = useCase.execute(input);
     assertNotNull(output);
 
     Order savedOrder = orderRepo.findById(order.getId()).orElseThrow();
@@ -92,7 +92,7 @@ public class RemoveItemFromOrderUseCaseTest {
     order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 10);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 10);
 
     assertThrows(InvalidOrderItemException.class,
         () -> useCase.execute(input));
@@ -100,7 +100,7 @@ public class RemoveItemFromOrderUseCaseTest {
 
   @Test
   void shouldThrowWhenOrderNotFound() {
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(OrderId.generate(), MenuItemId.generate(), 5);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(OrderId.generate(), MenuItemId.generate(), 5);
     assertThrows(OrderNotFoundException.class,
         () -> useCase.execute(input));
   }
@@ -112,7 +112,7 @@ public class RemoveItemFromOrderUseCaseTest {
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.BRL);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 10);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 10);
 
     assertThrows(InvalidOrderException.class,
         () -> useCase.execute(input));
@@ -125,8 +125,8 @@ public class RemoveItemFromOrderUseCaseTest {
     order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 3);
-    RemoveItemFromOrderOutput output = useCase.execute(input);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 3);
+    DecreaseItemQuantityFromOrderOutput output = useCase.execute(input);
 
     assertEquals(order.getId(), output.orderId());
     assertEquals(Money.of(20, Currency.BRL), output.newTotal());
@@ -143,8 +143,8 @@ public class RemoveItemFromOrderUseCaseTest {
     order.addItem(menuItemId, "name", "description", MenuItemCategory.DESSERT, Money.of(10, Currency.BRL), 5);
     this.orderRepo.save(order);
 
-    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(order.getId(), menuItemId, 5);
-    RemoveItemFromOrderOutput output = useCase.execute(input);
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(order.getId(), menuItemId, 5);
+    DecreaseItemQuantityFromOrderOutput output = useCase.execute(input);
 
     assertEquals(order.getId(), output.orderId());
     assertEquals(Money.of(0.0, Currency.BRL), output.newTotal());
