@@ -11,24 +11,24 @@ public class RemoveItemFromOrderInputTest {
   @Test
   void shouldThrowWhenInputOrderIdIsNull() {
     assertThrows(NullPointerException.class,
-        () -> new RemoveItemFromOrderInput(null, MenuItemId.generate(), 2));
+        () -> new DecreaseItemQuantityFromOrderInput(null, MenuItemId.generate(), 2));
   }
 
   @Test
   void shouldThrowWhenInputMenuItemIdIsNull() {
     assertThrows(NullPointerException.class,
-        () -> new RemoveItemFromOrderInput(OrderId.generate(), null, 2));
+        () -> new DecreaseItemQuantityFromOrderInput(OrderId.generate(), null, 2));
   }
 
   @Test
   void shouldThrowWhenInputQuantityIsNegative() {
     assertThrows(InvalidOrderItemQuantityException.class,
-        () -> new RemoveItemFromOrderInput(OrderId.generate(), MenuItemId.generate(), -10));
+        () -> new DecreaseItemQuantityFromOrderInput(OrderId.generate(), MenuItemId.generate(), -10));
   }
 
   @Test
   void shouldThrowWhenInputQuantityIsZero() {
     assertThrows(InvalidOrderItemQuantityException.class,
-        () -> new RemoveItemFromOrderInput(OrderId.generate(), MenuItemId.generate(), 0));
+        () -> new DecreaseItemQuantityFromOrderInput(OrderId.generate(), MenuItemId.generate(), 0));
   }
 }

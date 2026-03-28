@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.delivery.application.dto.order.AddItemToOrderInput;
 import br.com.delivery.application.dto.order.AddItemToOrderOutput;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
-import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderInput;
+import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderOutput;
 import br.com.delivery.application.dto.order.CancelOrderInput;
 import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
-import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
+import br.com.delivery.application.usecases.order.DecreaseItemQuantityFromOrderUseCase;
 import br.com.delivery.application.usecases.order.CancelOrderUseCase;
 import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.order.OrderId;
@@ -35,12 +35,12 @@ import br.com.delivery.infrastructure.web.dto.RemoveItemFromOrderResponse;
 @RequestMapping("/orders")
 public class OrderController {
     private final AddItemToOrderUseCase addItemToOrderUseCase;
-    private final RemoveItemFromOrderUseCase removeItemFromOrderUseCase;
+    private final DecreaseItemQuantityFromOrderUseCase removeItemFromOrderUseCase;
     private final CancelOrderUseCase cancelOrderUseCase;
 
     public OrderController(
         AddItemToOrderUseCase addItemToOrderUseCase,
-        RemoveItemFromOrderUseCase removeItemFromOrderUseCase,
+        DecreaseItemQuantityFromOrderUseCase removeItemFromOrderUseCase,
         CancelOrderUseCase cancelOrderUseCase
 
     ) {
@@ -70,13 +70,13 @@ public class OrderController {
         @PathVariable String menuItemId,
         @RequestParam int quantity
     ) {
-        RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(
+        DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(
             new OrderId(UUID.fromString(orderId)),
             new MenuItemId(UUID.fromString(menuItemId)),
             quantity
         );
 
-        RemoveItemFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
+        DecreaseItemQuantityFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
 
         List<OrderItemResponse> remainingItems = output.remainingItems().stream()
             .map(item -> new OrderItemResponse(
