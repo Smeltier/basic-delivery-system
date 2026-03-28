@@ -104,10 +104,32 @@ public class OrderTest {
 
     order.addItem(menuItemId, "product", "description", MenuItemCategory.DESSERT, price, 2);
 
-    order.decreaseItem(menuItemId, 2);
+    order.removeItem(menuItemId);
 
     assertEquals(0, order.getItems().size());
     assertTrue(order.getItems().isEmpty());
+  }
+
+  @Test
+  void shouldDecreaseItemQuantitySuccessfuly() {
+    AccountId clientId = AccountId.generate();
+    RestaurantId restaurantId = RestaurantId.generate();
+    Currency brl = Currency.BRL;
+    Order order = Order.create(restaurantId, clientId, brl);
+
+    MenuItemId menuItemId = MenuItemId.generate();
+    Money price = Money.of(50.0, Currency.BRL);
+
+    order.addItem(menuItemId, "product", "description", MenuItemCategory.DESSERT, price, 2);
+
+    order.decreaseItem(menuItemId, 1);
+
+    assertTrue(order.getItems().stream()
+        .filter(item -> item.getMenuItemId().equals(menuItemId) && item.getQuantity() == 1)
+        .findFirst()
+        .isPresent());
+    assertEquals(1, order.getItems().size());
+    assertFalse(order.getItems().isEmpty());
   }
 
   @Test
