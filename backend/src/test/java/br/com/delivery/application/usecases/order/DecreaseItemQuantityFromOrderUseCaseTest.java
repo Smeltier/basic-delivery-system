@@ -106,7 +106,7 @@ public class DecreaseItemQuantityFromOrderUseCaseTest {
   }
 
   @Test
-  void shouldThrowWhenItemDoesNotExistte() {
+  void shouldThrowWhenItemDoesNotExist() {
     MenuItemId menuItemId = MenuItemId.generate();
 
     Order order = Order.create(RestaurantId.generate(), AccountId.generate(), Currency.BRL);
