@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
 import br.com.delivery.application.usecases.order.CancelOrderUseCase;
 import br.com.delivery.application.usecases.order.DecreaseItemQuantityFromOrderUseCase;
+import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
 import br.com.delivery.domain.repositories.IAccountRepository;
 import br.com.delivery.domain.repositories.IClientRepository;
 import br.com.delivery.domain.repositories.IOrderRepository;
@@ -59,7 +60,12 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public DecreaseItemQuantityFromOrderUseCase removeItemFromOrderUseCase(IOrderRepository orderRepository) {
+    public RemoveItemFromOrderUseCase removeItemFromOrderUseCase(IOrderRepository orderRepository) {
+        return new RemoveItemFromOrderUseCase(orderRepository);
+    }
+
+    @Bean
+    public DecreaseItemQuantityFromOrderUseCase decreaseItemQuantityFromOrderUseCase(IOrderRepository orderRepository) {
         return new DecreaseItemQuantityFromOrderUseCase(orderRepository);
     }
 }
