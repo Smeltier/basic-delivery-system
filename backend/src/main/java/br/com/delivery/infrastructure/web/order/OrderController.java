@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,9 +19,13 @@ import br.com.delivery.application.dto.order.AddItemToOrderInput;
 import br.com.delivery.application.dto.order.AddItemToOrderOutput;
 import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderInput;
 import br.com.delivery.application.dto.order.DecreaseItemQuantityFromOrderOutput;
+import br.com.delivery.application.dto.order.OrderItemOutput;
+import br.com.delivery.application.dto.order.RemoveItemFromOrderInput;
+import br.com.delivery.application.dto.order.RemoveItemFromOrderOutput;
 import br.com.delivery.application.dto.order.CancelOrderInput;
 import br.com.delivery.application.usecases.order.AddItemToOrderUseCase;
 import br.com.delivery.application.usecases.order.DecreaseItemQuantityFromOrderUseCase;
+import br.com.delivery.application.usecases.order.RemoveItemFromOrderUseCase;
 import br.com.delivery.application.usecases.order.CancelOrderUseCase;
 import br.com.delivery.domain.account.AccountId;
 import br.com.delivery.domain.order.OrderId;
@@ -30,75 +35,99 @@ import br.com.delivery.infrastructure.web.dto.AddItemToOrderRequest;
 import br.com.delivery.infrastructure.web.dto.AddItemToOrderResponse;
 import br.com.delivery.infrastructure.web.dto.OrderItemResponse;
 import br.com.delivery.infrastructure.web.dto.RemoveItemFromOrderResponse;
+import br.com.delivery.infrastructure.web.dto.DecreaseItemQuantityFromOrderResponse;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-    private final AddItemToOrderUseCase addItemToOrderUseCase;
-    private final DecreaseItemQuantityFromOrderUseCase removeItemFromOrderUseCase;
-    private final CancelOrderUseCase cancelOrderUseCase;
+  private final AddItemToOrderUseCase addItemToOrderUseCase;
+  private final RemoveItemFromOrderUseCase removeItemFromOrderUseCase;
+  private final DecreaseItemQuantityFromOrderUseCase decreaseItemQuantityFromOrderUseCase;
+  private final CancelOrderUseCase cancelOrderUseCase;
 
-    public OrderController(
-        AddItemToOrderUseCase addItemToOrderUseCase,
-        DecreaseItemQuantityFromOrderUseCase removeItemFromOrderUseCase,
-        CancelOrderUseCase cancelOrderUseCase
+  public OrderController(
+      AddItemToOrderUseCase addItemToOrderUseCase,
+      RemoveItemFromOrderUseCase removeItemFromOrderUseCase,
+      DecreaseItemQuantityFromOrderUseCase decreaseItemQuantityFromOrderUseCase,
+      CancelOrderUseCase cancelOrderUseCase
+  ) {
+    this.addItemToOrderUseCase = Objects.requireNonNull(addItemToOrderUseCase);
+    this.removeItemFromOrderUseCase = Objects.requireNonNull(removeItemFromOrderUseCase);
+    this.decreaseItemQuantityFromOrderUseCase = Objects.requireNonNull(decreaseItemQuantityFromOrderUseCase);
+    this.cancelOrderUseCase = Objects.requireNonNull(cancelOrderUseCase);
+  }
 
-    ) {
-        this.addItemToOrderUseCase = Objects.requireNonNull(addItemToOrderUseCase);
-        this.removeItemFromOrderUseCase = Objects.requireNonNull(removeItemFromOrderUseCase);
-        this.cancelOrderUseCase = Objects.requireNonNull(cancelOrderUseCase);
-    }
+  @PostMapping("/items")
+  @ResponseStatus(HttpStatus.CREATED)
+  public AddItemToOrderResponse addItem(
+      @RequestBody AddItemToOrderRequest request
+  ) {
+    AddItemToOrderInput input = new AddItemToOrderInput(
+        new AccountId(UUID.fromString(request.accountId())),
+        new RestaurantId(UUID.fromString(request.restaurantId())),
+        new MenuItemId(UUID.fromString(request.menuItemId())),
+        request.quantity()
+    );
+    AddItemToOrderOutput output = addItemToOrderUseCase.execute(input);
+    return new AddItemToOrderResponse(output.orderId().value().toString());
+  }
 
-    @PostMapping("/items")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AddItemToOrderResponse addItem(@RequestBody AddItemToOrderRequest request) {
-        AddItemToOrderInput input = new AddItemToOrderInput(
-            new AccountId(UUID.fromString(request.accountId())),
-            new RestaurantId(UUID.fromString(request.restaurantId())),
-            new MenuItemId(UUID.fromString(request.menuItemId())),
-            request.quantity()
-        );
+  @DeleteMapping("/{orderId}/items/{menuItemId}")
+  public RemoveItemFromOrderResponse removeItem(
+      @PathVariable String orderId,
+      @PathVariable String menuItemId
+  ) {
+    RemoveItemFromOrderInput input = new RemoveItemFromOrderInput(
+        new OrderId(UUID.fromString(orderId)),
+        new MenuItemId(UUID.fromString(menuItemId))
+    );
 
-        AddItemToOrderOutput output = addItemToOrderUseCase.execute(input);
+    RemoveItemFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
 
-        return new AddItemToOrderResponse(output.orderId().value().toString());
-    }
+    return new RemoveItemFromOrderResponse(
+        output.orderId().value().toString(),
+        output.newTotal().amount(),
+        mapOrderItems(output.remainingItems())
+    );
+  }
 
-    @DeleteMapping("/{orderId}/items/{menuItemId}")
-    public RemoveItemFromOrderResponse removeItem(
-        @PathVariable String orderId,
-        @PathVariable String menuItemId,
-        @RequestParam int quantity
-    ) {
-        DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(
-            new OrderId(UUID.fromString(orderId)),
-            new MenuItemId(UUID.fromString(menuItemId)),
-            quantity
-        );
+  @PatchMapping("/{orderId}/items/{menuItemId}/decrease")
+  public DecreaseItemQuantityFromOrderResponse decreaseItemQuantity(
+      @PathVariable String orderId,
+      @PathVariable String menuItemId,
+      @RequestParam int quantity
+  ) {
+    DecreaseItemQuantityFromOrderInput input = new DecreaseItemQuantityFromOrderInput(
+        new OrderId(UUID.fromString(orderId)),
+        new MenuItemId(UUID.fromString(menuItemId)),
+        quantity
+    );
 
-        DecreaseItemQuantityFromOrderOutput output = removeItemFromOrderUseCase.execute(input);
+    DecreaseItemQuantityFromOrderOutput output = decreaseItemQuantityFromOrderUseCase.execute(input);
 
-        List<OrderItemResponse> remainingItems = output.remainingItems().stream()
-            .map(item -> new OrderItemResponse(
-                item.menuItemId().value().toString(),
-                item.quantity(),
-                item.unitPrice().amount()
-            ))
-            .toList();
+    return new DecreaseItemQuantityFromOrderResponse(
+        output.orderId().value().toString(),
+        output.newTotal().amount(),
+        mapOrderItems(output.remainingItems())
+    );
+  }
 
-        return new RemoveItemFromOrderResponse(
-            output.orderId().value().toString(),
-            output.newTotal().amount(),
-            remainingItems
-        );
-    }
+  @DeleteMapping("/{orderId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void cancelOrder(
+    @PathVariable String orderId
+  ) {
+    CancelOrderInput input = new CancelOrderInput(new OrderId(UUID.fromString(orderId)));
+    cancelOrderUseCase.execute(input);
+  }
 
-    @DeleteMapping("/{orderId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelOrder(@PathVariable String orderId) {
-        CancelOrderInput input = new CancelOrderInput(
-            new OrderId(UUID.fromString(orderId))
-);
-        cancelOrderUseCase.execute(input);
-    }
+  private List<OrderItemResponse> mapOrderItems(List<OrderItemOutput> items) {
+    return items.stream()
+        .map(item -> new OrderItemResponse(
+            item.menuItemId().value().toString(),
+            item.quantity(),
+            item.unitPrice().amount()
+        ))
+        .toList();
+  } 
 }
