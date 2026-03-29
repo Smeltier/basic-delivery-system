@@ -3,6 +3,7 @@ package br.com.delivery.application.usecases.order;
 import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -152,24 +153,31 @@ public class DecreaseItemQuantityFromOrderUseCaseTest {
   }
 
   private static class FakeOrderRepository implements br.com.delivery.domain.repositories.IOrderRepository {
-    private final Map<OrderId, Order> map = new HashMap<>();
+    private final Map<OrderId, Order> storage = new HashMap<>();
 
     @Override
     public Optional<Order> findById(OrderId id) {
-      return Optional.ofNullable(map.get(id));
+      return Optional.ofNullable(storage.get(id));
     }
 
     @Override
     public Optional<Order> findDraftByClientAndRestaurant(AccountId accountId, RestaurantId restaurantId) {
-      return map.values().stream()
+      return storage.values().stream()
           .filter(o -> o.getAccountId().equals(accountId) && o.getRestaurantId().equals(restaurantId)
               && o.getStatus() == br.com.delivery.domain.order.OrderStatus.DRAFT)
           .findFirst();
     }
 
     @Override
+    public List<Order> findAllByClientId(AccountId accountId) {
+      return storage.values().stream()
+          .filter(order -> order.getAccountId().equals(accountId))
+          .toList();
+    }
+
+    @Override
     public void save(Order order) {
-      map.put(order.getId(), order);
+      storage.put(order.getId(), order);
     }
   }
 }
